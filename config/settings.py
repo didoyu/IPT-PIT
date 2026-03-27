@@ -70,19 +70,17 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # DATABASE (Render PostgreSQL)
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'iptdidoy12345678901020102101231829124948',
-        'USER': 'iptdidoy12345678901020102101231829124948_user',
-        'PASSWORD': 'LTrHJSbOOL4MmYxy83YmuY8gSbe3YDaI',
-        'HOST': 'dpg-d6cj10ggjchc739lpofg-a.oregon-postgres.render.com',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'ipt_pit',
+        'USER': 'ipt_pit_user',
+        'PASSWORD': 'ZJWMoX7kEZKacBmOlHBSJsGjXP3eYmV9',
+        'HOST': 'dpg-d734foh9fqoc73cdn130-a.oregon-postgres.render.com',
         'PORT': '5432',
         'OPTIONS': {
-            'sslmode': 'require'
-        }
+            'sslmode': 'require',
+        },
     }
 }
-
-
 # PASSWORD VALIDATION
 AUTH_PASSWORD_VALIDATORS = [
     {
