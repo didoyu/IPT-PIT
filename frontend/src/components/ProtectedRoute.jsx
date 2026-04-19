@@ -17,3 +17,9 @@ export default function ProtectedRoute({ adminOnly = false }) {
   // 3. Otherwise, show the content
   return <Outlet />;
 }
+// This is the protected route component that checks for authentication and authorization before rendering the child routes.
+//  It uses React Router's Navigate and Outlet components to manage redirection and nested routes. 
+// The adminOnly prop can be set to true for routes that should only be accessible by staff users.
+// Django Admin 
+// Username: admin
+// Password: admin123 (Tinood ni legit totoo)
