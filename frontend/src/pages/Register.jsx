@@ -4,10 +4,23 @@ import axios from 'axios';
 
 export default function Register() {
   const [formData, setFormData] = useState({
-    username: '', password: '', email: '',
-    first_name: '', middle_name: '', last_name: '',
-    section: '', school_year: ''
+    username: '',
+    password: '',
+    email: '',
+
+    first_name: '',
+    middle_name: '',
+    last_name: '',
+
+    section: '',
+    school_year: '',
+
+    // ✅ NEW FIELDS
+    address: '',
+    age: '',
+    birthday: ''
   });
+
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
@@ -15,7 +28,7 @@ export default function Register() {
     e.preventDefault();
     setError('');
 
-    // ✅ VALIDATION (BLOCK N/A + EMPTY)
+    // ✅ VALIDATION
     if (
       !formData.section.trim() ||
       !formData.school_year.trim() ||
@@ -23,6 +36,16 @@ export default function Register() {
       formData.school_year.toLowerCase() === "n/a"
     ) {
       setError("Section and School Year cannot be empty or 'N/A'");
+      return;
+    }
+
+    if (!formData.first_name || !formData.last_name) {
+      setError("First name and Last name are required.");
+      return;
+    }
+
+    if (!formData.address || !formData.age || !formData.birthday) {
+      setError("Please fill in all personal details (address, age, birthday).");
       return;
     }
 
@@ -35,15 +58,15 @@ export default function Register() {
     }
   };
 
-  const inputStyle = "w-full px-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition";
-  const labelStyle = "block text-sm font-semibold text-slate-700 mb-2";
+  const inputStyle =
+    "w-full px-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition";
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-100 px-4 py-12">
       <div className="max-w-2xl w-full bg-white rounded-2xl shadow-xl p-8 border border-slate-200">
-        
+
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight uppercase">Create Account</h1>
+          <h1 className="text-3xl font-extrabold text-slate-900 uppercase">Create Account</h1>
           <p className="text-slate-500 mt-2">Join the examination portal as a student</p>
         </div>
 
@@ -58,52 +81,120 @@ export default function Register() {
           {/* ACCOUNT */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="md:col-span-2">
-              <h2 className="text-xs font-black uppercase text-indigo-600 tracking-widest border-b pb-2 mb-4">Account Security</h2>
+              <h2 className="text-xs font-black uppercase text-indigo-600 border-b pb-2 mb-4">
+                Account Security
+              </h2>
             </div>
 
-            <input type="text" required className={inputStyle}
+            <input
+              type="text"
+              required
+              className={inputStyle}
               placeholder="Username"
-              onChange={(e) => setFormData({...formData, username: e.target.value})} />
+              onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+            />
 
-            <input type="email" className={inputStyle}
+            <input
+              type="email"
+              required
+              className={inputStyle}
               placeholder="Email"
-              onChange={(e) => setFormData({...formData, email: e.target.value})} />
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+            />
           </div>
 
-          {/* PERSONAL */}
+          {/* PERSONAL NAME */}
           <div className="grid grid-cols-3 gap-4">
-            <input type="text" required className={inputStyle}
+            <input
+              type="text"
+              required
+              className={inputStyle}
               placeholder="First Name"
-              onChange={(e) => setFormData({...formData, first_name: e.target.value})} />
+              onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
+            />
 
-            <input type="text" className={inputStyle}
+            <input
+              type="text"
+              className={inputStyle}
               placeholder="Middle Name"
-              onChange={(e) => setFormData({...formData, middle_name: e.target.value})} />
+              onChange={(e) => setFormData({ ...formData, middle_name: e.target.value })}
+            />
 
-            <input type="text" required className={inputStyle}
+            <input
+              type="text"
+              required
+              className={inputStyle}
               placeholder="Last Name"
-              onChange={(e) => setFormData({...formData, last_name: e.target.value})} />
+              onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
+            />
+          </div>
+
+          {/* PERSONAL DETAILS */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <input
+              type="text"
+              required
+              className={inputStyle}
+              placeholder="Address"
+              onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+            />
+
+            <input
+              type="number"
+              required
+              className={inputStyle}
+              placeholder="Age"
+              onChange={(e) => setFormData({ ...formData, age: e.target.value })}
+            />
+
+            <input
+              type="date"
+              required
+              className={inputStyle}
+              onChange={(e) => setFormData({ ...formData, birthday: e.target.value })}
+            />
           </div>
 
           {/* ACADEMIC */}
           <div className="grid grid-cols-2 gap-6">
-            <input type="text" required className={inputStyle}
+            <input
+              type="text"
+              required
+              className={inputStyle}
               placeholder="Section (e.g. BSIT-4A)"
-              onChange={(e) => setFormData({...formData, section: e.target.value})} />
+              onChange={(e) => setFormData({ ...formData, section: e.target.value })}
+            />
 
-            <input type="text" required className={inputStyle}
+            <input
+              type="text"
+              required
+              className={inputStyle}
               placeholder="School Year (e.g. 2025-2026)"
-              onChange={(e) => setFormData({...formData, school_year: e.target.value})} />
+              onChange={(e) => setFormData({ ...formData, school_year: e.target.value })}
+            />
           </div>
 
           {/* PASSWORD */}
-          <input type="password" required className={inputStyle}
+          <input
+            type="password"
+            required
+            className={inputStyle}
             placeholder="Password"
-            onChange={(e) => setFormData({...formData, password: e.target.value})} />
+            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+          />
 
-          <button className="w-full bg-indigo-600 text-white py-3 rounded-lg">
+          <button className="w-full bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 transition">
             Register
           </button>
+
+          {/* LOGIN LINK */}
+          <p className="text-center text-sm text-slate-500">
+            Already have an account?{" "}
+            <Link to="/" className="text-indigo-600 font-bold">
+              Login
+            </Link>
+          </p>
+
         </form>
       </div>
     </div>

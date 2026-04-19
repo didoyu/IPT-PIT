@@ -27,6 +27,10 @@ def register_view(request):
     section = data.get('section', '').strip()
     school_year = data.get('school_year', '').strip()
 
+    address=data.get('address')
+    age=data.get('age')
+    birthday=data.get('birthday')
+
     # ✅ BLOCK INVALID INPUT
     if not section or section.lower() == 'n/a':
         return Response({'error': 'Invalid section'}, status=400)
@@ -44,8 +48,12 @@ def register_view(request):
         first_name=data.get('first_name'),
         middle_name=data.get('middle_name', ''),
         last_name=data.get('last_name'),
+        email=email, # Ensure the email is also saved to the profile if needed
         section=section,
-        school_year=school_year
+        school_year=school_year,
+        address=address,
+        age=age,
+        birthday=birthday
     )
 
     return Response({'message': 'Registration successful'}, status=201)
@@ -76,34 +84,46 @@ def login_view(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def admin_filter_options(request):
+
+    # 🔐 Admin-only access
     if not request.user.is_staff:
-        return Response(status=403)
-    
+        return Response({"detail": "Forbidden"}, status=403)
+
+    # 📊 Get all exam results
     results = ExamResult.objects.select_related('user__profile', 'exam')
 
     sections = set()
     years = set()
     exams = set()
 
-    for r in results:
-        prof = getattr(r.user, 'profile', None)
+    # 🔄 Extract unique values
+    for result in results:
+        profile = getattr(result.user, 'profile', None)
 
-        if prof:
-            if prof.section and prof.section.strip():
-                sections.add(prof.section.strip())
+        # ---- Sections ----
+        if profile and profile.section:
+            section = profile.section.strip()
+            if section:
+                sections.add(section)
 
-            if prof.school_year and prof.school_year.strip():
-                years.add(prof.school_year.strip())
+        # ---- School Years ----
+        if profile and profile.school_year:
+            year = profile.school_year.strip()
+            if year:
+                years.add(year)
 
-        if r.exam and r.exam.title:
-            exams.add(r.exam.title.strip())
+        # ---- Exams ----
+        if result.exam and result.exam.title:
+            exam_title = result.exam.title.strip()
+            if exam_title:
+                exams.add(exam_title)
 
+    # 📤 Return sorted response
     return Response({
-        "sections": sorted(list(sections)),
-        "years": sorted(list(years)),
-        "exams": sorted(list(exams)),
+        "sections": sorted(sections),
+        "years": sorted(years),
+        "exams": sorted(exams),
     })
-
 
 # --- VIEWSETS (CRUD) ---
 
@@ -203,3 +223,26 @@ def student_results_list(request):
 def has_taken_exam(request, exam_id):
     taken = ExamResult.objects.filter(user=request.user, exam_id=exam_id).exists()
     return Response({"taken": taken})
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def user_profile(request):
+    user = request.user
+    profile = getattr(user, 'profile', None)
+
+    return Response({
+        "username": user.username,
+        "email": user.email,
+
+        "first_name": profile.first_name if profile else "",
+        "middle_name": profile.middle_name if profile else "",
+        "last_name": profile.last_name if profile else "",
+
+        "section": profile.section if profile else "",
+        "school_year": profile.school_year if profile else "",
+
+        # ✅ ADD THESE
+        "address": profile.address if profile else "",
+        "age": profile.age if profile else None,
+        "birthday": profile.birthday if profile else None,
+    })

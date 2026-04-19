@@ -25,9 +25,9 @@ export default function Login() {
       localStorage.setItem('isStaff', is_staff.toString());
 
       if (is_staff) {
-        navigate('/admin');
+        navigate('/profile');
       } else {
-        navigate('/exams');
+        navigate('/profile');
       }
 
     } catch (err) {

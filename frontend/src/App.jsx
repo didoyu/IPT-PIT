@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Login from "./pages/Login"; 
+import Login from "./pages/Login";
 import Register from "./pages/Register";
 import MainLayout from "./layouts/MainLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -8,6 +8,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import ExamList from "./pages/student/ExamList";
 import TakeExam from "./pages/student/TakeExam";
 import StudentDashboard from "./pages/student/StudentDashboard";
+import Profile from "./pages/Profile"; // ✅ ADDED
 
 // Admin Pages
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -18,20 +19,23 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Public */}
+
+        {/* ================= PUBLIC ROUTES ================= */}
         <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
-        {/* Private */}
+        {/* ================= PROTECTED ROUTES ================= */}
         <Route element={<ProtectedRoute />}>
+
           <Route element={<MainLayout />}>
-            
-            {/* Student Routes */}
+
+            {/* ---------- STUDENT ROUTES ---------- */}
             <Route path="/exams" element={<ExamList />} />
             <Route path="/take-exam/:id" element={<TakeExam />} />
             <Route path="/dashboard" element={<StudentDashboard />} />
+            <Route path="/profile" element={<Profile />} /> {/* ✅ FIXED */}
 
-            {/* Admin Routes */}
+            {/* ---------- ADMIN ROUTES ---------- */}
             <Route element={<ProtectedRoute adminOnly={true} />}>
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/admin/create-exam" element={<CreateExam />} />
@@ -41,7 +45,13 @@ function App() {
           </Route>
         </Route>
 
-        <Route path="*" element={<div className="p-10 text-center">404: Page Not Found</div>} />
+        {/* ================= 404 ================= */}
+        <Route path="*" element={
+          <div className="p-10 text-center text-xl font-bold">
+            404: Page Not Found
+          </div>
+        } />
+
       </Routes>
     </BrowserRouter>
   );

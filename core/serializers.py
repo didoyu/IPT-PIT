@@ -27,16 +27,21 @@ class ExamSerializer(serializers.ModelSerializer):
         model = Exam
         fields = ['id', 'title', 'description', 'pass_mark', 'questions']
 
+from rest_framework import serializers
+from .models import Exam, Question, Option, ExamResult
+
 class ExamSubmissionSerializer(serializers.Serializer):
     exam_id = serializers.IntegerField()
-    # Changed to handle either a string (essay) or a list (multiple choice)
-    answers = serializers.DictField() 
-
-
+    answers = serializers.DictField()
 
     def save(self):
         user = self.context['request'].user
         exam = Exam.objects.get(id=self.validated_data['exam_id'])
+
+        # 🚫 BLOCK MULTIPLE ATTEMPTS
+        if ExamResult.objects.filter(user=user, exam=exam).exists():
+            raise serializers.ValidationError("You have already taken this exam.")
+
         submitted_answers = self.validated_data['answers']
         
         score = 0
@@ -47,18 +52,16 @@ class ExamSubmissionSerializer(serializers.Serializer):
 
         for q in questions:
             ans = submitted_answers.get(str(q.id))
-            if not ans: continue
+            if not ans:
+                continue
 
             if q.question_type == 'MCQ':
-                # Get all correct option IDs as strings for comparison
                 correct_ids = list(q.options.filter(is_correct=True).values_list('id', flat=True))
                 correct_ids_str = set(map(str, correct_ids))
                 
-                # Student answer will arrive as a list from the checkbox logic
                 student_ans_set = set(map(str, ans)) if isinstance(ans, list) else {str(ans)}
                 
-                # Check if student's set of choices matches the correct set exactly
-                if student_ans_set == correct_ids_str: 
+                if student_ans_set == correct_ids_str:
                     score += 1
             
             elif q.question_type == 'ESSAY' and q.required_keywords:
@@ -70,4 +73,9 @@ class ExamSubmissionSerializer(serializers.Serializer):
         percentage = (score / questions.count()) * 100
         passed = percentage >= exam.pass_mark
         
-        return ExamResult.objects.create(user=user, exam=exam, score=score, is_passed=passed)
+        return ExamResult.objects.create(
+            user=user,
+            exam=exam,
+            score=score,
+            is_passed=passed
+        )
