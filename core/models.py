@@ -2,6 +2,10 @@ from django.db import models
 from django.contrib.auth.models import User
 
 
+class Profile(models.Model): #btw you gotta "python -m pip install Pillow" so you can install the custom user profile with avatar
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
+
 # --- SUBJECT MODEL ---
 class Subject(models.Model):
     name = models.CharField(max_length=100)

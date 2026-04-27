@@ -245,4 +245,5 @@ def user_profile(request):
         "address": profile.address if profile else "",
         "age": profile.age if profile else None,
         "birthday": profile.birthday if profile else None,
+        "avatar": request.build_absolute_uri(profile.avatar.url) if profile and profile.avatar else None,
     })
