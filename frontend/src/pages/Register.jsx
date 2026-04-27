@@ -165,13 +165,23 @@ export default function Register() {
               onChange={(e) => setFormData({ ...formData, section: e.target.value })}
             />
 
-            <input
-              type="text"
+            <select
               required
               className={inputStyle}
-              placeholder="School Year (e.g. 2025-2026)"
+              value={formData.school_year}
               onChange={(e) => setFormData({ ...formData, school_year: e.target.value })}
-            />
+            >
+              <option value="" disabled>Select School Year</option>
+              {Array.from({ length: 2026 - 1980 }, (_, i) => {
+                const year = 1980 + i;
+                const range = `${year}-${year + 1}`;
+                return (
+                  <option key={range} value={range}>
+                    {range}
+                  </option>
+                );
+              })}
+            </select>
           </div>
 
           {/* PASSWORD */}
