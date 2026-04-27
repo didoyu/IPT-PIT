@@ -15,11 +15,21 @@ from .serializers import ExamSerializer, ExamSubmissionSerializer, QuestionSeria
 
 # --- AUTHENTICATION ---
 
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str
+from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
+from django.conf import settings
+
+# --- AUTHENTICATION ---
+
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def register_view(request):
     data = request.data
-
+    
     username = data.get('username')
     password = data.get('password')
     email = data.get('email')
@@ -30,6 +40,9 @@ def register_view(request):
     address=data.get('address')
     age=data.get('age')
     birthday=data.get('birthday')
+    
+    # ✅ GET PROFILE PICTURE
+    profile_picture = request.FILES.get('profile_picture')
 
     # ✅ BLOCK INVALID INPUT
     if not section or section.lower() == 'n/a':
@@ -41,22 +54,73 @@ def register_view(request):
     if User.objects.filter(username=username).exists():
         return Response({'error': 'Username already taken'}, status=400)
 
+    # ✅ Create user but inactive
     user = User.objects.create_user(username=username, password=password, email=email)
+    user.is_active = False
+    user.save()
 
     Profile.objects.create(
         user=user,
         first_name=data.get('first_name'),
         middle_name=data.get('middle_name', ''),
         last_name=data.get('last_name'),
-        email=email, # Ensure the email is also saved to the profile if needed
+        email=email,
         section=section,
         school_year=school_year,
         address=address,
         age=age,
-        birthday=birthday
+        birthday=birthday,
+        profile_picture=profile_picture
     )
 
-    return Response({'message': 'Registration successful'}, status=201)
+    # ✅ SEND ACTIVATION EMAIL
+    try:
+        token = default_token_generator.make_token(user)
+        uid = urlsafe_base64_encode(force_bytes(user.pk))
+        
+        # Determine activation link (Point to React frontend)
+        # In production, change localhost:5173 to your actual frontend domain
+        activation_link = f"http://localhost:5173/activate/{uid}/{token}"
+        
+        context = {
+            'username': user.username,
+            'activation_link': activation_link,
+        }
+        
+        html_content = render_to_string('emails/activation_email.html', context)
+        text_content = strip_tags(html_content)
+        
+        email_msg = EmailMultiAlternatives(
+            subject="Activate your Account",
+            body=text_content,
+            from_email=settings.EMAIL_HOST_USER,
+            to=[email]
+        )
+        email_msg.attach_alternative(html_content, "text/html")
+        email_msg.send()
+        
+    except Exception as e:
+        print(f"Error sending email: {e}")
+        # Even if email fails, user is created. But ideally we handle this.
+
+    return Response({'message': 'Registration successful! Please check your email to activate your account.'}, status=201)
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def activate_account(request, uidb64, token):
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+
+    if user is not None and default_token_generator.check_token(user, token):
+        user.is_active = True
+        user.save()
+        return Response({'message': 'Account activated successfully! You can now login.'}, status=200)
+    else:
+        return Response({'error': 'Activation link is invalid or expired.'}, status=400)
+
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def login_view(request):

@@ -67,20 +67,14 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 
-# DATABASE (Render PostgreSQL)
+# DATABASE (Local SQLite)
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'ipt_pit',
-        'USER': 'ipt_pit_user',
-        'PASSWORD': 'ZJWMoX7kEZKacBmOlHBSJsGjXP3eYmV9',
-        'HOST': 'dpg-d734foh9fqoc73cdn130-a.oregon-postgres.render.com',
-        'PORT': '5432',
-        'OPTIONS': {
-            'sslmode': 'require',
-        },
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
 # PASSWORD VALIDATION
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -112,9 +106,23 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
+# MEDIA FILES
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# EMAIL SETTINGS (SMTP backend for sending real emails)
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'JESON1941@GMAIL.COM'
+EMAIL_HOST_PASSWORD = 'spxidwyecjxkmkmj' 
+
+
 
 # DEFAULT PRIMARY KEY
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
 
 
 # CORS (FOR FRONTEND - VERY IMPORTANT)
