@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from .models import Exam, Question, Option, ExamResult
+from .models import Exam, Question, Option, ExamResult, Profile
+from djoser.serializers import UserSerializer, UserCreateSerializer as BaseSerializer
 
 class OptionSerializer(serializers.ModelSerializer):
     class Meta:
@@ -79,3 +80,53 @@ class ExamSubmissionSerializer(serializers.Serializer):
             score=score,
             is_passed=passed
         )
+
+class UserSerializer(UserSerializer):
+    # Change this to SerializerMethodField for better Cloudinary URL resolution
+    profile_picture = serializers.SerializerMethodField()
+    
+    # Keep these as they are for data mapping
+    section = serializers.CharField(source='profile.section', required=False)
+    school_year = serializers.CharField(source='profile.school_year', required=False)
+    address = serializers.CharField(source='profile.address', required=False)
+    age = serializers.IntegerField(source='profile.age', required=False)
+    birthday = serializers.DateField(source='profile.birthday', required=False)
+
+    class Meta(UserSerializer.Meta):
+        fields = UserSerializer.Meta.fields + (
+            'profile_picture', 'section', 'school_year', 
+            'address', 'age', 'birthday', 'first_name', 'last_name'
+        )
+
+    # This method ensures the frontend gets the full https://res.cloudinary.com/... URL
+    def get_profile_picture(self, obj):
+        try:
+            if obj.profile and obj.profile.profile_picture:
+                return obj.profile.profile_picture.url
+        except (AttributeError, ValueError):
+            return None
+        return None
+
+    def update(self, instance, validated_data):
+        # DRF groups 'source="profile.x"' fields into a 'profile' dict
+        profile_data = validated_data.pop('profile', {})
+        profile = instance.profile
+        
+        # Update User fields (username, email, etc.)
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+
+        # Update Profile fields (section, address, profile_picture, etc.)
+        for attr, value in profile_data.items():
+            setattr(profile, attr, value)
+        profile.save()
+
+        return instance # ✅ MUST RETURN THE USER INSTANCE
+    
+class UserCreateSerializer(BaseSerializer):
+    class Meta(BaseSerializer.Meta):
+        fields = BaseSerializer.Meta.fields + (
+            'first_name',
+            'last_name',
+        )    

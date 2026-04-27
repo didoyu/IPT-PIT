@@ -19,43 +19,56 @@ from .serializers import ExamSerializer, ExamSubmissionSerializer, QuestionSeria
 @permission_classes([AllowAny])
 def register_view(request):
     data = request.data
+    files = request.FILES 
 
     username = data.get('username')
     password = data.get('password')
+    re_password = data.get('re_password')
     email = data.get('email')
+
+    if password != re_password:
+        return Response({'error': 'Passwords do not match'}, status=400)
 
     section = data.get('section', '').strip()
     school_year = data.get('school_year', '').strip()
 
-    address=data.get('address')
-    age=data.get('age')
-    birthday=data.get('birthday')
-
-    # ✅ BLOCK INVALID INPUT
     if not section or section.lower() == 'n/a':
         return Response({'error': 'Invalid section'}, status=400)
-
-    if not school_year or school_year.lower() == 'n/a':
-        return Response({'error': 'Invalid school year'}, status=400)
 
     if User.objects.filter(username=username).exists():
         return Response({'error': 'Username already taken'}, status=400)
 
-    user = User.objects.create_user(username=username, password=password, email=email)
-
-    Profile.objects.create(
-        user=user,
-        first_name=data.get('first_name'),
-        middle_name=data.get('middle_name', ''),
-        last_name=data.get('last_name'),
-        email=email, # Ensure the email is also saved to the profile if needed
-        section=section,
-        school_year=school_year,
-        address=address,
-        age=age,
-        birthday=birthday
+    # 1. Create User
+    user = User.objects.create_user(
+        username=username,
+        password=password,
+        email=email
     )
 
+    # 2. Update Profile
+    # The signal creates the profile, we just need to update the fields
+    profile = user.profile
+    profile.first_name = data.get('first_name')
+    profile.middle_name = data.get('middle_name', '')
+    profile.last_name = data.get('last_name')
+    profile.email = email
+    profile.section = section
+    profile.school_year = school_year
+    profile.address = data.get('address')
+    
+    age = data.get('age')
+    profile.age = int(age) if age and str(age).isdigit() else None
+    
+    birthday = data.get('birthday')
+    if birthday:
+        profile.birthday = birthday
+
+    # ✅ Handling the file specifically for Cloudinary storage
+    if 'profile_picture' in files:
+        profile.profile_picture = files['profile_picture']
+
+    profile.save() # Crucial: This triggers the upload to Cloudinary
+    
     return Response({'message': 'Registration successful'}, status=201)
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -228,21 +241,34 @@ def has_taken_exam(request, exam_id):
 @permission_classes([IsAuthenticated])
 def user_profile(request):
     user = request.user
-    profile = getattr(user, 'profile', None)
+    # Fetch profile safely
+    try:
+        profile = user.profile
+    except Profile.DoesNotExist:
+        return Response({'error': 'Profile not found'}, status=404)
+
+    # Safely handle the Cloudinary URL
+    pic_url = None
+    if profile.profile_picture:
+        try:
+            pic_url = profile.profile_picture.url
+            # Sometimes local storage prepends /media/, Cloudinary should be absolute
+            if pic_url and not pic_url.startswith('http'):
+                # Force absolute path if necessary, but Cloudinary usually handles this
+                pass 
+        except ValueError:
+            pic_url = None
 
     return Response({
         "username": user.username,
         "email": user.email,
-
-        "first_name": profile.first_name if profile else "",
-        "middle_name": profile.middle_name if profile else "",
-        "last_name": profile.last_name if profile else "",
-
-        "section": profile.section if profile else "",
-        "school_year": profile.school_year if profile else "",
-
-        # ✅ ADD THESE
-        "address": profile.address if profile else "",
-        "age": profile.age if profile else None,
-        "birthday": profile.birthday if profile else None,
+        "first_name": profile.first_name or "",
+        "middle_name": profile.middle_name or "",
+        "last_name": profile.last_name or "",
+        "section": profile.section or "",
+        "school_year": profile.school_year or "",
+        "address": profile.address or "",
+        "age": profile.age,
+        "birthday": profile.birthday,
+        "profile_picture": pic_url,
     })

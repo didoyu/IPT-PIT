@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        .button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <h2>Welcome to the Portal!</h2>
+    <p>Hello,</p>
+    <p>Please click the button below to activate your account and start your exams:</p>
+    
+    <a href="http://localhost:3000/activate/{{ uid }}/{{ token }}" class="button" style="color: white;">
+        Activate Account
+    </a>
+
+    <p>If the button doesn't work, copy and paste this link: <br>
+    http://localhost:3000/activate/{{ uid }}/{{ token }}</p>
+</body>
+</html>
