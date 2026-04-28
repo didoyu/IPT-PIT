@@ -45,7 +45,7 @@ ROOT_URLCONF = 'config.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [], 
+        'DIRS': [os.path.join(BASE_DIR, 'templates')], 
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -143,3 +143,7 @@ EMAIL_HOST_USER = 'cailing.christiandave123@gmail.com' # Your Gmail
 EMAIL_HOST_PASSWORD = 'eznkpdisrfmlwfjy' # 16 digit Google App Password
 EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = 'cailing.christiandave123@gmail.com'
+
+DOMAIN = 'localhost:3000'
+SITE_NAME = 'Ydidoyu'
+PROTOCOL = 'http'

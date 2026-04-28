@@ -8,8 +8,8 @@ from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
 from rest_framework import serializers
 from rest_framework.decorators import api_view, permission_classes
-
-
+from djoser import email
+from .emails import CustomActivationEmail
 from .models import Exam, Question, Option, ExamResult, Profile
 from .serializers import ExamSerializer, ExamSubmissionSerializer, QuestionSerializer
 
@@ -24,7 +24,7 @@ def register_view(request):
     username = data.get('username')
     password = data.get('password')
     re_password = data.get('re_password')
-    email = data.get('email')
+    email_address = data.get('email')
 
     if password != re_password:
         return Response({'error': 'Passwords do not match'}, status=400)
@@ -38,20 +38,20 @@ def register_view(request):
     if User.objects.filter(username=username).exists():
         return Response({'error': 'Username already taken'}, status=400)
 
-    # 1. Create User
+    # 1. Create User (is_active=False is mandatory for activation flow)
     user = User.objects.create_user(
         username=username,
         password=password,
-        email=email
+        email=email_address,
+        is_active=False  
     )
 
-    # 2. Update Profile
-    # The signal creates the profile, we just need to update the fields
+    # 2. Update Profile (The signal usually creates the blank profile first)
     profile = user.profile
     profile.first_name = data.get('first_name')
     profile.middle_name = data.get('middle_name', '')
     profile.last_name = data.get('last_name')
-    profile.email = email
+    profile.email = email_address
     profile.section = section
     profile.school_year = school_year
     profile.address = data.get('address')
@@ -63,13 +63,30 @@ def register_view(request):
     if birthday:
         profile.birthday = birthday
 
-    # ✅ Handling the file specifically for Cloudinary storage
     if 'profile_picture' in files:
         profile.profile_picture = files['profile_picture']
 
-    profile.save() # Crucial: This triggers the upload to Cloudinary
+    profile.save() 
+
+    # 3. 🔥 Trigger YOUR Custom Activation Email
+    try:
+        # We manually build the context for the template
+        context = {"user": user}
+        to = [user.email]
+        
+        # This calls your class in emails.py which uses activation.html
+        CustomActivationEmail(request, context).send(to)
+        
+    except Exception as e:
+        print(f"SMTP Error: {e}")
+        return Response({
+            'message': 'Account created, but email failed. Please contact admin.',
+            'error': str(e)
+        }, status=201)
     
-    return Response({'message': 'Registration successful'}, status=201)
+    return Response({
+        'message': 'Registration successful. Please check your email to activate your account.'
+    }, status=201)
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def login_view(request):
