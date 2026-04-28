@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { Camera, Edit2, Check, X, Mail, ShieldCheck } from "lucide-react";
 
@@ -6,21 +7,17 @@ export default function Profile() {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("Profile");
-  const [isEditing, setIsEditing] = useState(false);
-  const [editData, setEditData] = useState({});
-  const [newImage, setNewImage] = useState(null);
-  const [imagePreview, setImagePreview] = useState(null);
-  
-  // Email Verification State
-  const [isVerifyingEmail, setIsVerifyingEmail] = useState(false);
-  const [verificationCode, setVerificationCode] = useState("");
-  const [emailStatus, setEmailStatus] = useState(""); // "", "sending", "sent", "verifying"
-  
+  const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef(null);
-  const tabs = ["Profile", "Results", "Settings"];
+
+  const tabs = ["Profile", "Results"];
 
   const fetchProfile = () => {
     const token = localStorage.getItem("auth");
+    if (!token) {
+      setLoading(false);
+      return;
+    }
     axios.get("http://127.0.0.1:8000/api/profile/", {
       headers: { Authorization: `Token ${token}` }
     })
@@ -35,6 +32,30 @@ export default function Profile() {
   useEffect(() => {
     fetchProfile();
   }, []);
+
+  const handleAvatarChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('avatar', file);
+
+    setUploading(true);
+    try {
+      const token = localStorage.getItem("auth");
+      const res = await axios.patch("http://127.0.0.1:8000/api/profile/avatar/", formData, {
+        headers: {
+          Authorization: `Token ${token}`,
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      setProfile(prev => ({ ...prev, avatar: res.data.avatar }));
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -123,17 +144,65 @@ export default function Profile() {
   return (
     <div className="min-h-screen bg-slate-50 flex">
       {/* SIDEBAR */}
-      <aside className="w-64 bg-white border-r border-slate-100 flex flex-col items-center py-10 px-6 gap-8">
-        {/* Avatar */}
-        <div className="relative group">
-          <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-xl bg-indigo-500 flex items-center justify-center">
-            {imagePreview ? (
-              <img src={imagePreview} className="w-full h-full object-cover" alt="Preview" />
-            ) : profile.profile_picture ? (
-              <img src={profile.profile_picture} className="w-full h-full object-cover" alt="Profile" />
-            ) : (
-              <span className="text-white text-4xl font-black">{initials}</span>
-            )}
+      <aside className="w-56 bg-white border-r border-slate-100 flex flex-col items-center py-10 px-4 gap-6">
+
+        {/* AVATAR */}
+        <div
+          className="relative group cursor-pointer"
+          style={{ width: '96px', height: '96px' }}
+          onClick={() => fileInputRef.current.click()}
+        >
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleAvatarChange}
+            accept="image/*"
+            className="hidden"
+          />
+
+          {profile.avatar ? (
+            <img
+              src={profile.avatar}
+              alt="avatar"
+              style={{
+                width: '96px',
+                height: '96px',
+                borderRadius: '50%',
+                objectFit: 'cover',
+                objectPosition: 'center',
+                display: 'block',
+              }}
+            />
+          ) : (
+            <div style={{
+              width: '96px',
+              height: '96px',
+              borderRadius: '50%',
+              backgroundColor: '#6366f1',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'white',
+              fontSize: '28px',
+              fontWeight: '900'
+            }}>
+              {initials}
+            </div>
+          )}
+
+          {/* Hover overlay */}
+          <div
+            className="absolute inset-0 group-hover:bg-black group-hover:bg-opacity-40 transition-all flex items-center justify-center"
+            style={{ borderRadius: '50%' }}
+          >
+            <span className="text-white text-xs font-bold opacity-0 group-hover:opacity-100 transition-all">
+              {uploading ? "Uploading..." : "Change"}
+            </span>
+          </div>
+
+          {/* Plus button */}
+          <div className="absolute bottom-0 right-0 w-6 h-6 bg-indigo-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+            +
           </div>
           {isEditing && (
             <button 
@@ -146,24 +215,16 @@ export default function Profile() {
           <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageChange} />
         </div>
 
-        <div className="text-center w-full">
-          {isEditing ? (
-            <div className="space-y-2">
-              <input 
-                className="w-full text-center font-bold text-slate-800 bg-slate-50 border border-slate-200 rounded-lg py-1"
-                value={editData.username}
-                onChange={e => setEditData({...editData, username: e.target.value})}
-              />
-              <p className="text-indigo-500 text-sm font-semibold">@{profile.username}</p>
-            </div>
-          ) : (
-            <>
-              <p className="font-black text-slate-800 text-xl capitalize">{profile.first_name} {profile.last_name}</p>
-              <p className="text-indigo-500 text-sm font-semibold">@{profile.username}</p>
-            </>
-          )}
+        {/* NAME */}
+        <div className="text-center">
+          <p className="font-black text-slate-800 text-base capitalize">
+            {profile.first_name} {profile.last_name}
+          </p>
+          <p className="text-indigo-500 text-sm font-semibold">@{profile.username}</p>
         </div>
 
+        {/* TABS */}
+        <nav className="w-full flex flex-col gap-1 mt-2">
         <nav className="w-full flex flex-col gap-2">
           {tabs.map(tab => (
             <button
@@ -213,14 +274,16 @@ export default function Profile() {
             )}
           </div>
         </div>
-
         {activeTab === "Profile" && (
-          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {/* Account Info */}
-            <section className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm">
-              <h3 className="text-xs font-black uppercase text-indigo-600 mb-6 tracking-widest flex items-center gap-2">
-                <ShieldCheck size={16} /> Account Information
+          <>
+            <section>
+              <h3 className="text-xs font-black uppercase text-slate-400 mb-4 tracking-widest">
+                Academic & Account
               </h3>
+              <div className="grid md:grid-cols-2 gap-4">
+                <InfoCard label="Email Address" value={profile.email || "No email provided"} />
+                <InfoCard label="Section" value={profile.section || "Not specified"} />
+                <InfoCard label="School Year" value={profile.school_year || "Not specified"} />
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-slate-400 uppercase ml-1">Email Address</label>
@@ -283,13 +346,14 @@ export default function Profile() {
               </div>
             </section>
 
-            {/* Static Personal Details */}
-            <section className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm opacity-80">
-              <h3 className="text-xs font-black uppercase text-slate-400 mb-6 tracking-widest">Personal Details (Contact Admin to change)</h3>
-              <div className="grid md:grid-cols-3 gap-6">
-                <InfoCard label="Full Name" value={`${profile.first_name} ${profile.last_name}`} />
-                <InfoCard label="Age" value={profile.age ? `${profile.age} years old` : "N/A"} />
-                <InfoCard label="Birthday" value={profile.birthday || "N/A"} />
+            <section>
+              <h3 className="text-xs font-black uppercase text-slate-400 mb-4 tracking-widest">
+                Personal Information
+              </h3>
+              <div className="grid md:grid-cols-2 gap-4">
+                <InfoCard label="Home Address" value={profile.address || "Not specified"} wide />
+                <InfoCard label="Age" value={profile.age ? `${profile.age} years old` : "Not specified"} />
+                <InfoCard label="Birthday" value={profile.birthday || "Not specified"} />
               </div>
             </section>
           </div>
@@ -302,7 +366,7 @@ export default function Profile() {
   );
 }
 
-function InfoCard({ label, value, isEditing, onChange, wide }) {
+function InfoCard({ label, value, wide }) {
   return (
     <div className={`space-y-2 ${wide ? "md:col-span-2" : ""}`}>
       <label className="text-xs font-bold text-slate-400 uppercase ml-1">{label}</label>

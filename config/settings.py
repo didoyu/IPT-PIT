@@ -3,6 +3,10 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+#CUSTOM profile pic fr
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
 # SECURITY
 SECRET_KEY = 'django-insecure-change-this-key-for-production'
 
@@ -114,6 +118,7 @@ DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+<<<<<<< HEAD
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': 'your_cloud_name', # Replace with your Cloud Name
     'API_KEY': 'your_api_key',       # Replace with your API Key
@@ -128,6 +133,23 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'JESON1941@GMAIL.COM'
 EMAIL_HOST_PASSWORD = 'spxidwyecjxkmkmj' 
+=======
+# EMAIL SETTINGS
+# By default use console backend in DEBUG to avoid SMTP issues during development.
+USE_SMTP = os.environ.get('USE_SMTP', 'False').lower() in ('1', 'true', 'yes')
+if USE_SMTP:
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
+    EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
+    EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True').lower() in ('1', 'true', 'yes')
+    EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
+    EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# Default from email (used when sending activation emails)
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', os.environ.get('EMAIL_HOST_USER', 'webmaster@localhost'))
+>>>>>>> cd3d74becbedc84e90b7f07dd77f9907c4a182c0
 
 
 
