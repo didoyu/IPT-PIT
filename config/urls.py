@@ -22,6 +22,9 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('admin/', admin.site.urls),
     
+    # Djoser URLs for authentication
+    path('api/auth/', include('djoser.urls')),
+    
     # This includes all URLs from your core/urls.py and prefixes them with api/
     path('api/', include('core.urls')), 
     

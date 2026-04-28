@@ -5,24 +5,29 @@ import axios from 'axios';
 const ActivateAccount = () => {
     const { uid, token } = useParams();
     const navigate = useNavigate();
-    const [status, setStatus] = useState('activating'); // activating, success, error
+    const [status, setStatus] = useState('activating');
+    const initialized = React.useRef(false); // Add this ref
 
     useEffect(() => {
-        const activate = async () => {
-            try {
-                // Adjust the URL to match your Django backend port
-                await axios.post('http://127.0.0.1:8000/auth/users/activation/', {
-                     uid,
-                    token
-                });
-                setStatus('success');
-                setTimeout(() => navigate('/login'), 3000);
-            } catch (err) {
-                setStatus('error');
-                console.error(err);
-            }
-        };
-        activate();
+        // Only run if it hasn't run before
+        if (!initialized.current) {
+            initialized.current = true;
+
+            const activate = async () => {
+                try {
+                    await axios.post('http://127.0.0.1:8000/api/auth/users/activation/', {
+                        uid,
+                        token
+                    });
+                    setStatus('success');
+                    setTimeout(() => navigate('/'), 3000);
+                } catch (err) {
+                    setStatus('error');
+                    console.log("Error Data:", err.response?.data);
+                }
+            };
+            activate();
+        }
     }, [uid, token, navigate]);
 
     return (

@@ -10,20 +10,24 @@ ALLOWED_HOSTS = ['.onrender.com', 'localhost', '127.0.0.1']
 
 # APPLICATIONS
 INSTALLED_APPS = [
-    'corsheaders',
-    'cloudinary_storage',  # 
+    # Django built-ins
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    
-    # Third Party Apps
-    'cloudinary',          # 
+
+    # Third Party
+    'corsheaders',
     'rest_framework',
     'rest_framework.authtoken',
-    'djoser',              # 
+    'rest_framework_simplejwt',
+    'djoser',
+    'cloudinary',
+    'cloudinary_storage',
+
+    # Local
     'core',
 ]
 
@@ -45,7 +49,7 @@ ROOT_URLCONF = 'config.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')], 
+        'DIRS': [], 
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -134,22 +138,16 @@ DJOSER = {
     },
 }
 
-# ✅ Requirement 2: Email Setup
-# By default in DEBUG use console backend to avoid silent SMTP failures during development.
-USE_SMTP = os.environ.get('USE_SMTP', 'False').lower() in ('1', 'true', 'yes')
-if DEBUG and not USE_SMTP:
-    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-else:
-    EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.smtp.EmailBackend')
-    EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
-    EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
-    EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'cailing.christiandave123@gmail.com')
-    EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
-    EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True').lower() in ('1', 'true', 'yes')
+# ✅ Requirement 2: Email SMTP Setup
+# Use 'django.core.mail.backends.console.EmailBackend' to test without sending real emails
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'cailing.christiandave123@gmail.com' # Your Gmail
+EMAIL_HOST_PASSWORD = 'eznkpdisrfmlwfjy' # 16 digit Google App Password
+EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = 'cailing.christiandave123@gmail.com'
 
-# Default from email
-DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', os.environ.get('EMAIL_HOST_USER', 'webmaster@localhost'))
-
-DOMAIN = 'localhost:3000'
-SITE_NAME = 'Ydidoyu'
+SITE_NAME = 'Student Exam Portal'  # This looks professional in the inbox
+DOMAIN = 'localhost:3000'          # This ensures the link goes to React
 PROTOCOL = 'http'
