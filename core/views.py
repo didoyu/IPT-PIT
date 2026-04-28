@@ -247,3 +247,19 @@ def user_profile(request):
         "birthday": profile.birthday if profile else None,
         "avatar": request.build_absolute_uri(profile.avatar.url) if profile and profile.avatar else None,
     })
+@api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
+def update_avatar(request):
+    profile = getattr(request.user, 'profile', None)
+    if not profile:
+        return Response({'error': 'Profile not found'}, status=404)
+
+    if 'avatar' in request.FILES:
+        profile.avatar = request.FILES['avatar']
+        profile.save()
+        return Response({
+            'message': 'Avatar updated',
+            'avatar': request.build_absolute_uri(profile.avatar.url)
+        })
+
+    return Response({'error': 'No image provided'}, status=400)

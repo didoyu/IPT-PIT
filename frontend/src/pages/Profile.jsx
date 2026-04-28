@@ -12,6 +12,10 @@ export default function Profile() {
 
   useEffect(() => {
     const token = localStorage.getItem("auth");
+    if (!token) {
+      setLoading(false);
+      return;
+    }
     axios.get("http://127.0.0.1:8000/api/profile/", {
       headers: { Authorization: `Token ${token}` }
     })
@@ -44,16 +48,39 @@ export default function Profile() {
     }
   };
 
-  // ... keep your existing loading and error states
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-slate-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
+          <p className="mt-4 text-slate-500 font-semibold">Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
 
-  const initials = `${profile?.first_name?.[0] || ""}${profile?.last_name?.[0] || ""}`.toUpperCase();
+  if (!profile) {
+    return (
+      <div className="p-10 text-center text-red-500 font-semibold">
+        Failed to load profile. Please try logging in again.
+      </div>
+    );
+  }
+
+  const initials = `${profile.first_name?.[0] || ""}${profile.last_name?.[0] || ""}`.toUpperCase();
 
   return (
     <div className="min-h-screen bg-slate-50 flex">
+
+      {/* SIDEBAR */}
       <aside className="w-56 bg-white border-r border-slate-100 flex flex-col items-center py-10 px-4 gap-6">
 
-        {/* ✅ UPDATED AVATAR */}
-        <div className="relative group cursor-pointer" onClick={() => fileInputRef.current.click()}>
+        {/* AVATAR */}
+        <div
+          className="relative group cursor-pointer"
+          style={{ width: '96px', height: '96px' }}
+          onClick={() => fileInputRef.current.click()}
+        >
           <input
             type="file"
             ref={fileInputRef}
@@ -62,31 +89,53 @@ export default function Profile() {
             className="hidden"
           />
 
-          {profile?.avatar ? (
+          {profile.avatar ? (
             <img
               src={profile.avatar}
               alt="avatar"
-              className="w-24 h-24 rounded-full object-cover"
+              style={{
+                width: '96px',
+                height: '96px',
+                borderRadius: '50%',
+                objectFit: 'cover',
+                objectPosition: 'center',
+                display: 'block',
+              }}
             />
           ) : (
-            <div className="w-24 h-24 rounded-full bg-indigo-500 flex items-center justify-center text-white text-3xl font-black">
+            <div style={{
+              width: '96px',
+              height: '96px',
+              borderRadius: '50%',
+              backgroundColor: '#6366f1',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'white',
+              fontSize: '28px',
+              fontWeight: '900'
+            }}>
               {initials}
             </div>
           )}
 
           {/* Hover overlay */}
-          <div className="absolute inset-0 rounded-full bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all flex items-center justify-center">
+          <div
+            className="absolute inset-0 group-hover:bg-black group-hover:bg-opacity-40 transition-all flex items-center justify-center"
+            style={{ borderRadius: '50%' }}
+          >
             <span className="text-white text-xs font-bold opacity-0 group-hover:opacity-100 transition-all">
               {uploading ? "Uploading..." : "Change"}
             </span>
           </div>
 
-          <div className="absolute bottom-1 right-1 w-6 h-6 bg-indigo-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+          {/* Plus button */}
+          <div className="absolute bottom-0 right-0 w-6 h-6 bg-indigo-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
             +
           </div>
         </div>
 
-        {/* keep everything else the same */}
+        {/* NAME */}
         <div className="text-center">
           <p className="font-black text-slate-800 text-base capitalize">
             {profile.first_name} {profile.last_name}
@@ -94,6 +143,7 @@ export default function Profile() {
           <p className="text-indigo-500 text-sm font-semibold">@{profile.username}</p>
         </div>
 
+        {/* TABS */}
         <nav className="w-full flex flex-col gap-1 mt-2">
           {tabs.map(tab => (
             <button
@@ -111,7 +161,7 @@ export default function Profile() {
         </nav>
       </aside>
 
-      {/* keep your existing main content */}
+      {/* MAIN CONTENT */}
       <main className="flex-1 p-10 space-y-8">
         {activeTab === "Profile" && (
           <>
@@ -121,8 +171,8 @@ export default function Profile() {
               </h3>
               <div className="grid md:grid-cols-2 gap-4">
                 <InfoCard label="Email Address" value={profile.email || "No email provided"} />
-                <InfoCard label="Section" value={profile.section} />
-                <InfoCard label="School Year" value={profile.school_year} />
+                <InfoCard label="Section" value={profile.section || "Not specified"} />
+                <InfoCard label="School Year" value={profile.school_year || "Not specified"} />
               </div>
             </section>
 
