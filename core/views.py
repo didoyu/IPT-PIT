@@ -9,6 +9,8 @@ from rest_framework.authtoken.models import Token
 from rest_framework import serializers
 from rest_framework.decorators import api_view, permission_classes
 from djoser import email
+from djoser.utils import encode_uid
+from django.contrib.auth.tokens import default_token_generator
 from .emails import CustomActivationEmail
 from .models import Exam, Question, Option, ExamResult, Profile
 from .serializers import ExamSerializer, ExamSubmissionSerializer, QuestionSerializer
@@ -70,8 +72,12 @@ def register_view(request):
 
     # 3. 🔥 Trigger YOUR Custom Activation Email
     try:
-        # We manually build the context for the template
-        context = {"user": user}
+        # Include uid/token for activation templates
+        context = {
+            "user": user,
+            "uid": encode_uid(user.pk),
+            "token": default_token_generator.make_token(user),
+        }
         to = [user.email]
         
         # This calls your class in emails.py which uses activation.html

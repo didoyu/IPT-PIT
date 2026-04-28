@@ -22,11 +22,11 @@
     <p>Hello,</p>
     <p>Please click the button below to activate your account and start your exams:</p>
     
-    <a href="http://localhost:3000/activate/{{ uid }}/{{ token }}" class="button" style="color: white;">
+    <a href="{{ url }}" class="button" style="color: white;">
         Activate Account
     </a>
 
     <p>If the button doesn't work, copy and paste this link: <br>
-    http://localhost:3000/activate/{{ uid }}/{{ token }}</p>
+    {{ url }}</p>
 </body>
 </html>

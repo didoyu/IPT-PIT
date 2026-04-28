@@ -1,3 +1,4 @@
+from django.conf import settings
 from djoser import email
 
 class CustomActivationEmail(email.ActivationEmail):
@@ -7,8 +8,10 @@ class CustomActivationEmail(email.ActivationEmail):
 
     def get_context_data(self):
         context = super().get_context_data()
-        # Ensure these are explicitly available in the context
-        context['uid'] = context.get('uid')
-        context['token'] = context.get('token')
-        context['url'] = f"http://localhost:3000/activate/{context['uid']}/{context['token']}"
+        uid = context.get('uid')
+        token = context.get('token')
+        if uid and token:
+            base = f"{settings.PROTOCOL}://{settings.DOMAIN}"
+            activation_path = settings.DJOSER.get('ACTIVATION_URL', 'activate/{uid}/{token}')
+            context['url'] = f"{base}/{activation_path}".format(uid=uid, token=token)
         return context
