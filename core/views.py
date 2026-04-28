@@ -10,7 +10,9 @@ from rest_framework import serializers
 from rest_framework.decorators import api_view, permission_classes
 
 
-from .models import Exam, Question, Option, ExamResult, Profile
+from .models import Exam, Question, Option, ExamResult, Profile, PendingEmailChange
+import random
+
 from .serializers import ExamSerializer, ExamSubmissionSerializer, QuestionSerializer
 
 # --- AUTHENTICATION ---
@@ -309,4 +311,90 @@ def user_profile(request):
         "address": profile.address if profile else "",
         "age": profile.age if profile else None,
         "birthday": profile.birthday if profile else None,
+        "profile_picture": request.build_absolute_uri(profile.profile_picture.url) if profile and profile.profile_picture else None,
     })
+
+# --- PROFILE UPDATES ---
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def update_profile(request):
+    user = request.user
+    profile = user.profile
+    data = request.data
+
+    # Update Username (if unique)
+    new_username = data.get('username')
+    if new_username and new_username != user.username:
+        if User.objects.filter(username=new_username).exists():
+            return Response({'error': 'Username already taken'}, status=400)
+        user.username = new_username
+
+    # Update Profile Fields
+    if 'section' in data:
+        profile.section = data.get('section')
+    if 'address' in data:
+        profile.address = data.get('address')
+    
+    # Update Profile Picture
+    if 'profile_picture' in request.FILES:
+        profile.profile_picture = request.FILES['profile_picture']
+
+    user.save()
+    profile.save()
+
+    return Response({'message': 'Profile updated successfully'})
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def request_email_change(request):
+    new_email = request.data.get('new_email')
+    if not new_email:
+        return Response({'error': 'New email is required'}, status=400)
+
+    # Generate 6-digit code
+    code = f"{random.randint(100000, 999999)}"
+    
+    # Store pending change
+    PendingEmailChange.objects.filter(user=request.user).delete() # Remove previous ones
+    PendingEmailChange.objects.create(user=request.user, new_email=new_email, code=code)
+
+    # Send Email
+    try:
+        context = {'code': code, 'username': request.user.username}
+        html_content = render_to_string('emails/email_change_code.html', context)
+        text_content = strip_tags(html_content)
+
+        email_msg = EmailMultiAlternatives(
+            subject="Your Email Verification Code",
+            body=text_content,
+            from_email=settings.EMAIL_HOST_USER,
+            to=[new_email]
+        )
+        email_msg.attach_alternative(html_content, "text/html")
+        email_msg.send()
+        return Response({'message': 'Verification code sent to your new email.'})
+    except Exception as e:
+        return Response({'error': f'Failed to send email: {str(e)}'}, status=500)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def verify_email_change(request):
+    code = request.data.get('code')
+    pending = PendingEmailChange.objects.filter(user=request.user, code=code).first()
+
+    if not pending:
+        return Response({'error': 'Invalid or expired verification code'}, status=400)
+
+    # Update User and Profile
+    user = request.user
+    user.email = pending.new_email
+    user.save()
+
+    profile = user.profile
+    profile.email = pending.new_email
+    profile.save()
+
+    pending.delete()
+
+    return Response({'message': 'Email updated successfully'})

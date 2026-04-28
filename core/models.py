@@ -93,3 +93,13 @@ class ExamResult(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.exam.title}"
+
+# --- EMAIL CHANGE VERIFICATION ---
+class PendingEmailChange(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    new_email = models.EmailField()
+    code = models.CharField(max_length=6)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username} -> {self.new_email} ({self.code})"

@@ -13,6 +13,9 @@ ALLOWED_HOSTS = ['.onrender.com', 'localhost', '127.0.0.1']
 
 # APPLICATIONS
 INSTALLED_APPS = [
+    'cloudinary_storage',
+    'django.contrib.staticfiles',
+    'cloudinary',
     'corsheaders',
 
     'django.contrib.admin',
@@ -20,12 +23,12 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
 
     'rest_framework',
     'rest_framework.authtoken',
     'core',
 ]
+
 
 
 # MIDDLEWARE
@@ -107,10 +110,18 @@ STATIC_URL = 'static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # MEDIA FILES
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': 'your_cloud_name', # Replace with your Cloud Name
+    'API_KEY': 'your_api_key',       # Replace with your API Key
+    'API_SECRET': 'your_api_secret'  # Replace with your API Secret
+}
+
 # EMAIL SETTINGS (SMTP backend for sending real emails)
+
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
