@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
-import { useEffect, useState, useRef } from "react";
 import axios from "axios";
+
 import { Camera, Edit2, Check, X, Mail, ShieldCheck } from "lucide-react";
 
 export default function Profile() {
@@ -9,8 +9,22 @@ export default function Profile() {
   const [activeTab, setActiveTab] = useState("Profile");
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef(null);
+  const editImageRef = useRef(null);
+
 
   const tabs = ["Profile", "Results"];
+
+  // ✅ Missing State Declarations
+  const [isEditing, setIsEditing] = useState(false);
+  const [editData, setEditData] = useState({});
+  const [newImage, setNewImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [emailStatus, setEmailStatus] = useState("");
+  const [isVerifyingEmail, setIsVerifyingEmail] = useState(false);
+  const [verificationCode, setVerificationCode] = useState("");
+  const [showSuccess, setShowSuccess] = useState(false);
+
+
 
   const fetchProfile = () => {
     const token = localStorage.getItem("auth");
@@ -22,9 +36,11 @@ export default function Profile() {
       headers: { Authorization: `Token ${token}` }
     })
     .then(res => {
-      setProfile(res.data);
-      setEditData(res.data);
+      const data = { ...res.data, avatar: res.data.profile_picture };
+      setProfile(data);
+      setEditData(data);
     })
+
     .catch(err => console.error(err))
     .finally(() => setLoading(false));
   };
@@ -33,29 +49,6 @@ export default function Profile() {
     fetchProfile();
   }, []);
 
-  const handleAvatarChange = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const formData = new FormData();
-    formData.append('avatar', file);
-
-    setUploading(true);
-    try {
-      const token = localStorage.getItem("auth");
-      const res = await axios.patch("http://127.0.0.1:8000/api/profile/avatar/", formData, {
-        headers: {
-          Authorization: `Token ${token}`,
-          'Content-Type': 'multipart/form-data'
-        }
-      });
-      setProfile(prev => ({ ...prev, avatar: res.data.avatar }));
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setUploading(false);
-    }
-  };
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -66,30 +59,47 @@ export default function Profile() {
   };
 
   const handleSaveProfile = async () => {
+    console.log("Save Profile Clicked");
     const token = localStorage.getItem("auth");
     const formData = new FormData();
     
-    if (editData.username !== profile.username) formData.append("username", editData.username);
-    if (editData.section !== profile.section) formData.append("section", editData.section);
-    if (editData.address !== profile.address) formData.append("address", editData.address);
-    if (newImage) formData.append("profile_picture", newImage);
+    // ✅ Include all fields
+    formData.append("first_name", editData.first_name || "");
+    formData.append("middle_name", editData.middle_name || "");
+    formData.append("last_name", editData.last_name || "");
+    formData.append("section", editData.section || "");
+    formData.append("school_year", editData.school_year || "");
+    formData.append("address", editData.address || "");
+    formData.append("age", editData.age || "");
+    formData.append("birthday", editData.birthday || "");
+    
+    if (newImage) {
+      formData.append("profile_picture", newImage);
+    }
 
     try {
+      console.log("Sending Profile Update Request...", Object.fromEntries(formData));
       await axios.post("http://127.0.0.1:8000/api/profile/update/", formData, {
         headers: { 
           Authorization: `Token ${token}`,
           "Content-Type": "multipart/form-data"
         }
       });
+      console.log("Update Successful!");
+      setShowSuccess(true);
       setIsEditing(false);
       fetchProfile();
       setNewImage(null);
       setImagePreview(null);
-      alert("Profile updated successfully!");
+      setTimeout(() => setShowSuccess(false), 3000);
     } catch (err) {
-      alert(err.response?.data?.error || "Failed to update profile");
+      console.error("Update Failed:", err);
+      alert(err.response?.data?.error || "Failed to update profile. Check console for details.");
     }
+
   };
+
+
 
   const handleRequestEmailCode = async () => {
     if (!editData.email || editData.email === profile.email) return;
@@ -150,19 +160,22 @@ export default function Profile() {
         <div
           className="relative group cursor-pointer"
           style={{ width: '96px', height: '96px' }}
-          onClick={() => fileInputRef.current.click()}
+          onClick={() => {
+            if (!isEditing) setIsEditing(true);
+            setTimeout(() => editImageRef.current.click(), 100);
+          }}
         >
           <input
             type="file"
             ref={fileInputRef}
-            onChange={handleAvatarChange}
-            accept="image/*"
             className="hidden"
+            accept="image/*"
           />
 
-          {profile.avatar ? (
+
+          {imagePreview || profile.avatar ? (
             <img
-              src={profile.avatar}
+              src={imagePreview || profile.avatar}
               alt="avatar"
               style={{
                 width: '96px',
@@ -190,6 +203,7 @@ export default function Profile() {
             </div>
           )}
 
+
           {/* Hover overlay */}
           <div
             className="absolute inset-0 group-hover:bg-black group-hover:bg-opacity-40 transition-all flex items-center justify-center"
@@ -206,13 +220,15 @@ export default function Profile() {
           </div>
           {isEditing && (
             <button 
-              onClick={() => fileInputRef.current.click()}
-              className="absolute bottom-1 right-1 bg-indigo-600 text-white p-2 rounded-full shadow-lg hover:bg-indigo-700 transition"
+              type="button"
+              onClick={() => editImageRef.current.click()}
+              className="absolute bottom-1 right-1 bg-indigo-600 text-white p-2 rounded-full shadow-lg hover:bg-indigo-700 transition z-20"
             >
               <Camera size={18} />
             </button>
           )}
-          <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageChange} />
+          <input type="file" ref={editImageRef} className="hidden" accept="image/*" onChange={handleImageChange} />
+
         </div>
 
         {/* NAME */}
@@ -224,8 +240,8 @@ export default function Profile() {
         </div>
 
         {/* TABS */}
-        <nav className="w-full flex flex-col gap-1 mt-2">
         <nav className="w-full flex flex-col gap-2">
+
           {tabs.map(tab => (
             <button
               key={tab}
@@ -242,7 +258,18 @@ export default function Profile() {
 
       {/* MAIN CONTENT */}
       <main className="flex-1 p-10 max-w-5xl">
+        {/* SUCCESS MESSAGE POPUP */}
+        {showSuccess && (
+          <div className="fixed top-10 left-1/2 -translate-x-1/2 z-50 animate-bounce">
+            <div className="bg-emerald-500 text-white px-8 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border-2 border-emerald-400">
+              <ShieldCheck size={24} />
+              <p className="font-black text-lg">Changes Saved Successfully!</p>
+            </div>
+          </div>
+        )}
+
         <div className="flex justify-between items-center mb-8">
+
           <div>
             <h1 className="text-3xl font-black text-slate-900">Student Profile</h1>
             <p className="text-slate-500 font-medium">Manage your personal and academic information</p>
@@ -258,11 +285,13 @@ export default function Profile() {
                   <X size={18} /> Cancel
                 </button>
                 <button 
+                  type="button"
                   onClick={handleSaveProfile}
-                  className="px-5 py-2.5 rounded-xl bg-indigo-600 text-white font-bold hover:bg-indigo-700 transition shadow-lg shadow-indigo-100 flex items-center gap-2"
+                  className="px-5 py-2.5 rounded-xl bg-indigo-600 text-white font-bold hover:bg-indigo-700 transition shadow-lg shadow-indigo-100 flex items-center gap-2 cursor-pointer z-10"
                 >
                   <Check size={18} /> Save Changes
                 </button>
+
               </>
             ) : (
               <button 
@@ -276,88 +305,118 @@ export default function Profile() {
         </div>
         {activeTab === "Profile" && (
           <>
-            <section>
-              <h3 className="text-xs font-black uppercase text-slate-400 mb-4 tracking-widest">
-                Academic & Account
-              </h3>
-              <div className="grid md:grid-cols-2 gap-4">
-                <InfoCard label="Email Address" value={profile.email || "No email provided"} />
-                <InfoCard label="Section" value={profile.section || "Not specified"} />
-                <InfoCard label="School Year" value={profile.school_year || "Not specified"} />
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-slate-400 uppercase ml-1">Email Address</label>
-                  <div className="flex gap-2">
-                    <input 
-                      disabled={!isEditing}
-                      className={`w-full px-4 py-3 rounded-xl border transition ${isEditing ? "bg-slate-50 border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none" : "bg-transparent border-transparent text-slate-800 font-semibold"}`}
-                      value={editData.email}
-                      onChange={e => setEditData({...editData, email: e.target.value})}
-                    />
-                    {isEditing && editData.email !== profile.email && !isVerifyingEmail && (
-                      <button 
-                        onClick={handleRequestEmailCode}
-                        disabled={emailStatus === "sending"}
-                        className="bg-indigo-600 text-white px-4 rounded-xl font-bold text-sm hover:bg-indigo-700 disabled:opacity-50"
-                      >
-                        {emailStatus === "sending" ? "Sending..." : "Verify"}
-                      </button>
+            <section className="space-y-8">
+              {/* ACADEMIC & ACCOUNT */}
+              <div className="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm space-y-6">
+                <h3 className="text-xs font-black uppercase text-slate-400 mb-2 tracking-widest flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full"></span>
+                  Academic & Account
+                </h3>
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-slate-400 uppercase ml-1">Email Address</label>
+                    <div className="flex gap-2">
+                      <div className={`w-full px-4 py-3 rounded-2xl border transition flex items-center bg-slate-50/50 border-slate-100 ${isEditing ? "focus-within:ring-2 focus-within:ring-indigo-500 focus-within:bg-white" : ""}`}>
+                        <input 
+                          disabled={!isEditing}
+                          className="w-full bg-transparent outline-none text-slate-800 font-semibold"
+                          value={isEditing ? editData.email : profile.email}
+                          onChange={e => setEditData({...editData, email: e.target.value})}
+                        />
+                      </div>
+                      {isEditing && editData.email !== profile.email && !isVerifyingEmail && (
+                        <button 
+                          onClick={handleRequestEmailCode}
+                          disabled={emailStatus === "sending"}
+                          className="bg-indigo-600 text-white px-4 rounded-2xl font-bold text-sm hover:bg-indigo-700 disabled:opacity-50 transition shadow-lg shadow-indigo-100"
+                        >
+                          {emailStatus === "sending" ? "..." : "Verify"}
+                        </button>
+                      )}
+                    </div>
+                    
+                    {isVerifyingEmail && (
+                      <div className="mt-4 p-4 bg-indigo-50 rounded-2xl border border-indigo-100 space-y-3">
+                        <p className="text-sm font-bold text-indigo-700 flex items-center gap-2">
+                          <Mail size={16} /> Enter code sent to {editData.email}
+                        </p>
+                        <div className="flex gap-2">
+                          <input 
+                            placeholder="000000"
+                            className="w-full px-4 py-2 rounded-xl border border-indigo-200 focus:ring-2 focus:ring-indigo-500 outline-none text-center font-bold tracking-widest bg-white"
+                            value={verificationCode}
+                            onChange={e => setVerificationCode(e.target.value.slice(0, 6))}
+                          />
+                          <button 
+                            onClick={handleVerifyEmail}
+                            className="bg-indigo-600 text-white px-6 rounded-xl font-bold hover:bg-indigo-700 transition"
+                          >
+                            Verify
+                          </button>
+                        </div>
+                      </div>
                     )}
                   </div>
-                  
-                  {isVerifyingEmail && (
-                    <div className="mt-4 p-4 bg-indigo-50 rounded-2xl border border-indigo-100 space-y-3">
-                      <p className="text-sm font-bold text-indigo-700 flex items-center gap-2">
-                        <Mail size={16} /> Enter verification code sent to {editData.email}
-                      </p>
-                      <div className="flex gap-2">
-                        <input 
-                          placeholder="6-digit code"
-                          className="w-full px-4 py-2 rounded-xl border border-indigo-200 focus:ring-2 focus:ring-indigo-500 outline-none text-center font-bold tracking-widest"
-                          value={verificationCode}
-                          onChange={e => setVerificationCode(e.target.value.slice(0, 6))}
-                        />
-                        <button 
-                          onClick={handleVerifyEmail}
-                          className="bg-indigo-600 text-white px-6 rounded-xl font-bold"
-                        >
-                          Verify
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
 
-                <InfoCard 
-                  label="Section" 
-                  value={editData.section} 
-                  isEditing={isEditing}
-                  onChange={val => setEditData({...editData, section: val})}
-                />
-                <div className="md:col-span-2">
                   <InfoCard 
-                    label="Home Address" 
-                    value={editData.address} 
+                    label="Section" 
+                    value={isEditing ? editData.section : profile.section} 
                     isEditing={isEditing}
-                    onChange={val => setEditData({...editData, address: val})}
-                    wide 
+                    onChange={val => setEditData({...editData, section: val})}
+                  />
+                  
+                  <InfoCard 
+                    label="School Year" 
+                    type="select"
+                    options={Array.from({ length: 2026 - 1980 }, (_, i) => {
+                      const year = 1980 + i;
+                      return `${year}-${year + 1}`;
+                    })}
+                    value={isEditing ? editData.school_year : profile.school_year} 
+                    isEditing={isEditing}
+                    onChange={val => setEditData({...editData, school_year: val})}
+                  />
+
+                </div>
+              </div>
+
+              {/* PERSONAL INFORMATION */}
+              <div className="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm space-y-6">
+                <h3 className="text-xs font-black uppercase text-slate-400 mb-2 tracking-widest flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 bg-rose-500 rounded-full"></span>
+                  Personal Information
+                </h3>
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div className="md:col-span-2 lg:col-span-3">
+                    <InfoCard 
+                      label="Home Address" 
+                      value={isEditing ? editData.address : profile.address} 
+                      isEditing={isEditing}
+                      onChange={val => setEditData({...editData, address: val})}
+                      wide 
+                    />
+                  </div>
+                  <InfoCard 
+                    label="Age" 
+                    type="number"
+                    value={isEditing ? editData.age : (profile.age ? `${profile.age} years old` : "Not specified")} 
+                    isEditing={isEditing}
+                    onChange={val => setEditData({...editData, age: val.slice(0, 2)})}
+                  />
+                  <InfoCard 
+                    label="Birthday" 
+                    type="date"
+                    value={isEditing ? editData.birthday : (profile.birthday || "Not specified")} 
+                    isEditing={isEditing}
+                    onChange={val => setEditData({...editData, birthday: val})}
                   />
                 </div>
               </div>
             </section>
 
-            <section>
-              <h3 className="text-xs font-black uppercase text-slate-400 mb-4 tracking-widest">
-                Personal Information
-              </h3>
-              <div className="grid md:grid-cols-2 gap-4">
-                <InfoCard label="Home Address" value={profile.address || "Not specified"} wide />
-                <InfoCard label="Age" value={profile.age ? `${profile.age} years old` : "Not specified"} />
-                <InfoCard label="Birthday" value={profile.birthday || "Not specified"} />
-              </div>
-            </section>
-          </div>
+          </>
         )}
+
 
         {activeTab === "Results" && <div className="p-20 text-center text-slate-400 font-bold">Results feature coming soon...</div>}
         {activeTab === "Settings" && <div className="p-20 text-center text-slate-400 font-bold">Settings feature coming soon...</div>}
@@ -366,21 +425,38 @@ export default function Profile() {
   );
 }
 
-function InfoCard({ label, value, wide }) {
+function InfoCard({ label, value, isEditing, onChange, wide, type = "text", options = [] }) {
   return (
-    <div className={`space-y-2 ${wide ? "md:col-span-2" : ""}`}>
+    <div className={`space-y-2 ${wide ? "md:col-span-2 lg:col-span-3" : ""}`}>
       <label className="text-xs font-bold text-slate-400 uppercase ml-1">{label}</label>
-      <div className={`w-full px-4 py-3 rounded-xl border transition ${isEditing ? "bg-slate-50 border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none" : "bg-transparent border-transparent text-slate-800 font-semibold"}`}>
+      <div className={`w-full px-4 py-3 rounded-2xl border transition bg-slate-50/50 border-slate-100 ${isEditing ? "focus-within:ring-2 focus-within:ring-indigo-500 focus-within:bg-white" : ""}`}>
         {isEditing ? (
-          <input 
-            className="bg-transparent w-full outline-none"
-            value={value || ""}
-            onChange={e => onChange(e.target.value)}
-          />
+          type === "select" ? (
+            <select 
+              className="bg-transparent w-full outline-none text-slate-800 font-semibold cursor-pointer"
+              value={value || ""}
+              onChange={e => onChange(e.target.value)}
+            >
+              <option value="" disabled>Select {label}</option>
+              {options.map(opt => (
+                <option key={opt} value={opt}>{opt}</option>
+              ))}
+            </select>
+          ) : (
+            <input 
+              type={type}
+              className="bg-transparent w-full outline-none text-slate-800 font-semibold"
+              value={value || ""}
+              onChange={e => onChange(e.target.value)}
+              onClick={e => type === 'date' && e.target.showPicker && e.target.showPicker()}
+            />
+          )
         ) : (
-          <p>{value || "Not specified"}</p>
+          <p className="text-slate-800 font-semibold">{value || "Not specified"}</p>
         )}
       </div>
     </div>
   );
 }
+
+
