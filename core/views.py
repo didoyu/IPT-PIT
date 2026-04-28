@@ -89,19 +89,19 @@ def register_view(request):
         html_content = render_to_string('emails/activation_email.html', context)
         text_content = strip_tags(html_content)
         
+        from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', settings.EMAIL_HOST_USER)
         email_msg = EmailMultiAlternatives(
             subject="Activate your Account",
             body=text_content,
-            from_email=settings.EMAIL_HOST_USER,
+            from_email=from_email,
             to=[email]
         )
         email_msg.attach_alternative(html_content, "text/html")
-        email_msg.send()
-        
-    except Exception as e:
-        print(f"Error sending email: {e}")
-        # Even if email fails, user is created. But ideally we handle this.
-
+        # send() will raise on failure (fail_silently=False)
+        try:
+            email_msg.send()
+        except Exception as e:
+            return Response({'error': 'Failed to send activation email', 'details': str(e)}, status=500)
     return Response({'message': 'Registration successful! Please check your email to activate your account.'}, status=201)
 
 @api_view(['GET'])
