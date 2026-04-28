@@ -1,7 +1,9 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import ActivateAccount from "./pages/ActivateAccount";
 import MainLayout from "./layouts/MainLayout";
+
 import ProtectedRoute from "./components/ProtectedRoute";
 
 // Student Pages
@@ -23,6 +25,8 @@ function App() {
         {/* ================= PUBLIC ROUTES ================= */}
         <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/activate/:uid/:token" element={<ActivateAccount />} />
+
 
         {/* ================= PROTECTED ROUTES ================= */}
         <Route element={<ProtectedRoute />}>
