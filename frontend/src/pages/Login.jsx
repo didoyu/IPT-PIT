@@ -1,12 +1,25 @@
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom'; // Added Link here
+import { useState, useEffect } from 'react';
+
+import { useNavigate, Link } from 'react-router-dom'; 
 import axios from 'axios';
+import { Eye, EyeOff, Lock, User } from 'lucide-react';
+
 
 export default function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+
   const navigate = useNavigate();
+  
+  useEffect(() => {
+    const auth = localStorage.getItem('auth');
+    if (auth) {
+      navigate('/profile');
+    }
+  }, [navigate]);
+
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -17,6 +30,16 @@ export default function Login() {
         username: username,
         password: password
       });
+
+      if (response.data.requires_2fa) {
+        navigate('/2fa-waiting', { 
+          state: { 
+            approvalToken: response.data.approval_token,
+            email: response.data.email 
+          } 
+        });
+        return;
+      }
 
       const { token, is_staff, username: dbUsername } = response.data;
 
@@ -52,27 +75,50 @@ export default function Login() {
         <form onSubmit={handleLogin} className="space-y-6">
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-2">Username</label>
-            <input 
-              type="text" 
-              className="w-full px-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition"
-              placeholder="Enter your username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              required
-            />
+            <div className="relative">
+              <User className="absolute left-3 top-3.5 text-slate-400" size={18} />
+              <input 
+                type="text" 
+                className="w-full px-4 py-3 pl-10 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition"
+                placeholder="Enter your username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+              />
+            </div>
           </div>
+
 
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-2">Password</label>
-            <input 
-              type="password" 
-              className="w-full px-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
+            <div className="relative">
+              <Lock className="absolute left-3 top-3.5 text-slate-400" size={18} />
+              <input 
+                type={showPassword ? "text" : "password"} 
+                className="w-full px-4 py-3 pl-10 pr-10 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition"
+                placeholder="Enter your password"
+                value={password}
+
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-3.5 text-slate-400 hover:text-indigo-600 transition"
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
           </div>
+
+
+          <div className="flex items-center justify-end">
+            <Link to="/forgot-password" size="sm" className="text-sm font-bold text-indigo-600 hover:text-indigo-700 transition">
+              Forgot Password?
+            </Link>
+          </div>
+
 
           <button 
             type="submit" 

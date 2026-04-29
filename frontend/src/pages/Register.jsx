@@ -1,7 +1,10 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
-import { CheckCircle, Image as ImageIcon, Lock, Mail, User, MapPin, Calendar, Hash } from 'lucide-react';
+import { CheckCircle, Image as ImageIcon, Lock, Mail, User, MapPin, Calendar, Hash, Eye, EyeOff, Scissors } from 'lucide-react';
+import ImageCropper from '../components/ImageCropper';
+
+
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -25,9 +28,33 @@ export default function Register() {
 
   const [error, setError] = useState('');
   const [isRegistered, setIsRegistered] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [imageToCrop, setImageToCrop] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+
+
   const navigate = useNavigate();
 
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setImageToCrop(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const onCropComplete = (croppedFile, previewUrl) => {
+    setFormData({ ...formData, profile_picture: croppedFile });
+    setImagePreview(previewUrl);
+    setImageToCrop(null);
+  };
+
   const handleRegister = async (e) => {
+
     e.preventDefault();
     setError('');
 
@@ -56,10 +83,6 @@ export default function Register() {
       }
     }
 
-    if (!formData.profile_picture) {
-      setError("Please upload a profile picture.");
-      return;
-    }
 
     // ✅ USE FORMDATA FOR FILE UPLOAD
     const data = new FormData();
@@ -204,7 +227,8 @@ export default function Register() {
             <div className="md:col-span-1 relative">
               <Hash className="absolute left-3 top-3.5 text-slate-400" size={18} />
               <input
-                type="number"
+                type="text"
+
                 required
                 min="1"
                 max="99"
@@ -276,24 +300,39 @@ export default function Register() {
             <div className="relative">
               <Lock className="absolute left-3 top-3.5 text-slate-400" size={18} />
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 required
-                className={`${inputStyle} pl-10`}
+                className={`${inputStyle} pl-10 pr-10`}
                 placeholder="Create Password"
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-3.5 text-slate-400 hover:text-indigo-600 transition"
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
             </div>
             <div className="relative">
               <Lock className="absolute left-3 top-3.5 text-slate-400" size={18} />
               <input
-                type="password"
+                type={showConfirmPassword ? "text" : "password"}
                 required
-                className={`${inputStyle} pl-10`}
+                className={`${inputStyle} pl-10 pr-10`}
                 placeholder="Confirm Password"
                 onChange={(e) => setFormData({ ...formData, confirm_password: e.target.value })}
               />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute right-3 top-3.5 text-slate-400 hover:text-indigo-600 transition"
+              >
+                {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
             </div>
           </div>
+
 
           {/* PROFILE PICTURE */}
           <div className="p-4 bg-slate-50 rounded-xl border border-dashed border-slate-300">
@@ -302,11 +341,21 @@ export default function Register() {
             </label>
             <input
               type="file"
-              required
               accept="image/*"
+
               className="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer"
-              onChange={(e) => setFormData({ ...formData, profile_picture: e.target.files[0] })}
+              onChange={handleImageChange}
             />
+            {imagePreview && (
+              <div className="mt-4 flex items-center gap-4 p-2 bg-white rounded-2xl border border-slate-100 shadow-sm animate-in fade-in slide-in-from-bottom-2 duration-300">
+                <img src={imagePreview} alt="Preview" className="w-16 h-16 rounded-full object-cover border-2 border-indigo-100 shadow-sm" />
+                <div className="flex-1">
+                  <p className="text-sm font-black text-slate-800">Photo Cropped</p>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Looking good!</p>
+                </div>
+              </div>
+            )}
+
           </div>
 
           <button className="w-full bg-indigo-600 text-white py-4 rounded-xl font-bold hover:bg-indigo-700 transition transform hover:scale-[1.01] active:scale-95 shadow-lg shadow-indigo-100">
@@ -323,6 +372,16 @@ export default function Register() {
 
         </form>
       </div>
+
+      {/* IMAGE CROPPER MODAL */}
+      {imageToCrop && (
+        <ImageCropper
+          image={imageToCrop}
+          onCropComplete={onCropComplete}
+          onCancel={() => setImageToCrop(null)}
+        />
+      )}
     </div>
+
   );
 }

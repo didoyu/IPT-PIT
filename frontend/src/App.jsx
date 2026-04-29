@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -16,8 +17,17 @@ import Profile from "./pages/Profile"; // ✅ ADDED
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import CreateExam from "./pages/admin/CreateExam";
 import AddQuestion from "./pages/admin/AddQuestion";
+import TwoFactorWaiting from "./pages/TwoFactorWaiting";
+import ForgotPassword from "./pages/ForgotPassword";
+
 
 function App() {
+  useEffect(() => {
+    // Force light mode
+    document.documentElement.classList.remove("dark");
+    localStorage.setItem("theme", "light");
+  }, []);
+
   return (
     <BrowserRouter>
       <Routes>
@@ -26,6 +36,8 @@ function App() {
         <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/activate/:uid/:token" element={<ActivateAccount />} />
+        <Route path="/2fa-waiting" element={<TwoFactorWaiting />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
 
 
         {/* ================= PROTECTED ROUTES ================= */}

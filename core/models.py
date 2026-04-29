@@ -22,6 +22,7 @@ class Profile(models.Model):
 
     section = models.CharField(max_length=50)
     school_year = models.CharField(max_length=20)
+    is_2fa_enabled = models.BooleanField(default=False)
 
     address = models.CharField(max_length=255, blank=True, null=True)
     age = models.IntegerField(blank=True, null=True)
@@ -103,3 +104,25 @@ class PendingEmailChange(models.Model):
 
     def __str__(self):
         return f"{self.user.username} -> {self.new_email} ({self.code})"
+
+# --- PASSWORD RESET ---
+class PasswordResetCode(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    code = models.CharField(max_length=6)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Reset code for {self.user.username}"
+
+# --- 2FA LOGIN APPROVAL ---
+import uuid
+class LoginApproval(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    code = models.CharField(max_length=6, default="")
+    is_approved = models.BooleanField(default=False)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Login for {self.user.username} (Approved: {self.is_approved})"
