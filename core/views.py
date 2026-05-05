@@ -10,6 +10,7 @@ from rest_framework import serializers
 from rest_framework.decorators import api_view, permission_classes
 from djoser.utils import encode_uid
 from django.contrib.auth.tokens import default_token_generator
+from datetime import date, datetime
 
 from .models import Exam, Question, Option, ExamResult, Profile
 from .serializers import ExamSerializer, ExamSubmissionSerializer, QuestionSerializer
@@ -47,6 +48,11 @@ def register_view(request):
         is_active=False  
     )
 
+    # Keep Django's User fields in sync for admin display
+    user.first_name = data.get('first_name', '')
+    user.last_name = data.get('last_name', '')
+    user.save()
+
     # 2. Update Profile (The signal usually creates the blank profile first)
     profile = user.profile
     profile.first_name = data.get('first_name')
@@ -58,11 +64,18 @@ def register_view(request):
     profile.address = data.get('address')
     
     age = data.get('age')
-    profile.age = int(age) if age and str(age).isdigit() else None
-    
     birthday = data.get('birthday')
     if birthday:
-        profile.birthday = birthday
+        try:
+            birthday_date = datetime.fromisoformat(birthday).date()
+            profile.birthday = birthday_date
+            if not age or not str(age).isdigit():
+                today = date.today()
+                age = today.year - birthday_date.year - ((today.month, today.day) < (birthday_date.month, birthday_date.day))
+        except ValueError:
+            return Response({'error': 'Invalid birthday format'}, status=400)
+
+    profile.age = int(age) if age and str(age).isdigit() else None
 
     if 'profile_picture' in files:
         profile.profile_picture = files['profile_picture']

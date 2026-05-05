@@ -100,17 +100,21 @@ class UserSerializer(UserSerializer):
 
     # This method ensures the frontend gets the full https://res.cloudinary.com/... URL
     def get_profile_picture(self, obj):
+        profile = getattr(obj, 'profile', None)
         try:
-            if obj.profile and obj.profile.profile_picture:
-                return obj.profile.profile_picture.url
+            if profile and profile.profile_picture:
+                return profile.profile_picture.url
         except (AttributeError, ValueError):
             return None
         return None
 
     def update(self, instance, validated_data):
         # DRF groups 'source="profile.x"' fields into a 'profile' dict
+        from .models import Profile
         profile_data = validated_data.pop('profile', {})
-        profile = instance.profile
+        profile = getattr(instance, 'profile', None)
+        if profile is None:
+            profile, _ = Profile.objects.get_or_create(user=instance)
         
         # Update User fields (username, email, etc.)
         for attr, value in validated_data.items():
