@@ -8,11 +8,12 @@ from .views import (
     forgot_password, reset_password_with_code, resend_password_reset_code
 )
 
-
+from .views import ChatbotView, KnowledgeBaseView #FOR CHATBOT NIGGA
 import rest_framework.routers
 router = rest_framework.routers.SimpleRouter()
 router.register(r'exams', ExamViewSet)
 router.register(r'questions', QuestionViewSet)
+
 
 urlpatterns = [
     path('', include(router.urls)),
@@ -37,5 +38,7 @@ urlpatterns = [
     path('profile/request-email-change/', request_email_change, name='request-email-change'),
     path('profile/verify-email-change/', verify_email_change, name='verify-email-change'),
     path('profile/change-password/', change_password, name='change-password'),
+    path('chat/', ChatbotView.as_view()),
+    path('knowledge/', KnowledgeBaseView.as_view()), #FOR CHATBOT NIGGA
 ]
 

@@ -29,6 +29,12 @@ from django.conf import settings
 
 # --- AUTHENTICATION ---
 
+# CHATBOT NIGGA FOR VEIWS
+import requests
+from rest_framework.generics import ListCreateAPIView
+from .models import KnowledgeBase, ChatMessage
+from .serializers import KnowledgeBaseSerializer, ChatMessageSerializer
+
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def register_view(request):
@@ -607,3 +613,55 @@ def change_password(request):
     # but the user will need to use their new password next time they log in.
     return Response({'message': 'Password changed successfully'})
 
+class ChatbotView(ListCreateAPIView):
+    queryset = ChatMessage.objects.all()
+    serializer_class = ChatMessageSerializer
+
+    def create(self, request, *args, **kwargs):
+        user_message = request.data.get("message")
+
+        user_chat = ChatMessage.objects.create(
+            role='user',
+            message=user_message
+        )
+
+        knowledge = KnowledgeBase.objects.all()
+        context = ""
+        for item in knowledge:
+            if item.text_content:
+                context += item.text_content + "\n"
+
+        prompt = f"""
+You are a helpful assistant.
+
+Knowledge:
+{context}
+
+User:
+{user_message}
+"""
+        response = requests.post(
+            "http://localhost:11434/api/generate",
+            json={
+                "model": "qwen2.5:0.5b",
+                "prompt": prompt,
+                "stream": False
+            }
+        )
+
+        data = response.json()
+        ai_response = data["response"]
+
+        ai_chat = ChatMessage.objects.create(
+            role='assistant',
+            message=ai_response
+        )
+
+        return Response({
+            "user": ChatMessageSerializer(user_chat).data,
+            "assistant": ChatMessageSerializer(ai_chat).data
+        })
+
+class KnowledgeBaseView(ListCreateAPIView):
+    queryset = KnowledgeBase.objects.all()
+    serializer_class = KnowledgeBaseSerializer

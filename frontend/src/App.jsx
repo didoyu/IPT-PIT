@@ -4,26 +4,23 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import ActivateAccount from "./pages/ActivateAccount";
 import MainLayout from "./layouts/MainLayout";
-
 import ProtectedRoute from "./components/ProtectedRoute";
-
 // Student Pages
 import ExamList from "./pages/student/ExamList";
 import TakeExam from "./pages/student/TakeExam";
 import StudentDashboard from "./pages/student/StudentDashboard";
-import Profile from "./pages/Profile"; // ✅ ADDED
-
+import Profile from "./pages/Profile";
 // Admin Pages
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import CreateExam from "./pages/admin/CreateExam";
 import AddQuestion from "./pages/admin/AddQuestion";
 import TwoFactorWaiting from "./pages/TwoFactorWaiting";
 import ForgotPassword from "./pages/ForgotPassword";
-
+// Chatbot mga niggas
+import Chatbot from './components/Chatbot';
 
 function App() {
   useEffect(() => {
-    // Force light mode
     document.documentElement.classList.remove("dark");
     localStorage.setItem("theme", "light");
   }, []);
@@ -31,7 +28,6 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-
         {/* ================= PUBLIC ROUTES ================= */}
         <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
@@ -39,17 +35,14 @@ function App() {
         <Route path="/2fa-waiting" element={<TwoFactorWaiting />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
 
-
         {/* ================= PROTECTED ROUTES ================= */}
         <Route element={<ProtectedRoute />}>
-
           <Route element={<MainLayout />}>
-
             {/* ---------- STUDENT ROUTES ---------- */}
             <Route path="/exams" element={<ExamList />} />
             <Route path="/take-exam/:id" element={<TakeExam />} />
             <Route path="/dashboard" element={<StudentDashboard />} />
-            <Route path="/profile" element={<Profile />} /> {/* ✅ FIXED */}
+            <Route path="/profile" element={<Profile />} />
 
             {/* ---------- ADMIN ROUTES ---------- */}
             <Route element={<ProtectedRoute adminOnly={true} />}>
@@ -57,7 +50,6 @@ function App() {
               <Route path="/admin/create-exam" element={<CreateExam />} />
               <Route path="/admin/add-question/:examId" element={<AddQuestion />} />
             </Route>
-
           </Route>
         </Route>
 
@@ -67,8 +59,10 @@ function App() {
             404: Page Not Found
           </div>
         } />
-
       </Routes>
+
+      {/* Chatbot outside Routes so it shows on every page */}
+      <Chatbot />
     </BrowserRouter>
   );
 }
