@@ -127,8 +127,12 @@ class LoginApproval(models.Model):
     def __str__(self):
         return f"Login for {self.user.username} (Approved: {self.is_approved})"
 
+<<<<<<< HEAD
 
 # --- KNOWLEDGE BASE FOR CHATBOT ---
+=======
+#Chatbot mga nibba
+>>>>>>> 0eeda1d0d1a6bc4895b71b00a464bebcffac2403
 class KnowledgeBase(models.Model):
     title = models.CharField(max_length=255)
     text_content = models.TextField(blank=True, null=True)
@@ -139,6 +143,7 @@ class KnowledgeBase(models.Model):
     def __str__(self):
         return self.title
 
+<<<<<<< HEAD
     def save(self, *args, **kwargs):
         if not self.text_content:
             extracted_text = ""
@@ -176,6 +181,8 @@ class KnowledgeBase(models.Model):
 
 
 # --- CHATBOT MESSAGE ---
+=======
+>>>>>>> 0eeda1d0d1a6bc4895b71b00a464bebcffac2403
 class ChatMessage(models.Model):
     ROLE_CHOICES = (
         ('user', 'User'),
@@ -186,5 +193,9 @@ class ChatMessage(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
+<<<<<<< HEAD
         return self.role
 
+=======
+        return self.role
+>>>>>>> 0eeda1d0d1a6bc4895b71b00a464bebcffac2403

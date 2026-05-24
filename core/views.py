@@ -31,6 +31,12 @@ from django.conf import settings
 
 # --- AUTHENTICATION ---
 
+# CHATBOT NIGGA FOR VEIWS
+import requests
+from rest_framework.generics import ListCreateAPIView
+from .models import KnowledgeBase, ChatMessage
+from .serializers import KnowledgeBaseSerializer, ChatMessageSerializer
+
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def register_view(request):
@@ -617,6 +623,7 @@ def change_password(request):
     # but the user will need to use their new password next time they log in.
     return Response({'message': 'Password changed successfully'})
 
+<<<<<<< HEAD
 
 # --- CHATBOT & KNOWLEDGE BASE VIEWS ---
 from rest_framework.generics import ListCreateAPIView
@@ -635,19 +642,36 @@ class ChatbotView(ListCreateAPIView):
             return Response({"error": "Message is required"}, status=status.HTTP_400_BAD_REQUEST)
 
         # save user message
+=======
+class ChatbotView(ListCreateAPIView):
+    queryset = ChatMessage.objects.all()
+    serializer_class = ChatMessageSerializer
+
+    def create(self, request, *args, **kwargs):
+        user_message = request.data.get("message")
+
+>>>>>>> 0eeda1d0d1a6bc4895b71b00a464bebcffac2403
         user_chat = ChatMessage.objects.create(
             role='user',
             message=user_message
         )
 
+<<<<<<< HEAD
         # get knowledge base context
+=======
+>>>>>>> 0eeda1d0d1a6bc4895b71b00a464bebcffac2403
         knowledge = KnowledgeBase.objects.all()
         context = ""
         for item in knowledge:
             if item.text_content:
                 context += item.text_content + "\n"
 
+<<<<<<< HEAD
         prompt = f"""You are a helpful assistant.
+=======
+        prompt = f"""
+You are a helpful assistant.
+>>>>>>> 0eeda1d0d1a6bc4895b71b00a464bebcffac2403
 
 Knowledge:
 {context}
@@ -655,6 +679,7 @@ Knowledge:
 User:
 {user_message}
 """
+<<<<<<< HEAD
 
         try:
             response = requests.post(
@@ -675,6 +700,20 @@ User:
             ai_response = f"Could not connect to Ollama. Please make sure Ollama is running locally and 'qwen2.5:0.5b' is downloaded. (Error: {str(e)})"
 
         # save AI response
+=======
+        response = requests.post(
+            "http://localhost:11434/api/generate",
+            json={
+                "model": "qwen2.5:0.5b",
+                "prompt": prompt,
+                "stream": False
+            }
+        )
+
+        data = response.json()
+        ai_response = data["response"]
+
+>>>>>>> 0eeda1d0d1a6bc4895b71b00a464bebcffac2403
         ai_chat = ChatMessage.objects.create(
             role='assistant',
             message=ai_response
@@ -683,6 +722,7 @@ User:
         return Response({
             "user": ChatMessageSerializer(user_chat).data,
             "assistant": ChatMessageSerializer(ai_chat).data
+<<<<<<< HEAD
         }, status=status.HTTP_201_CREATED)
 
 
@@ -692,3 +732,10 @@ class KnowledgeBaseView(ListCreateAPIView):
     permission_classes = [AllowAny]
 
 
+=======
+        })
+
+class KnowledgeBaseView(ListCreateAPIView):
+    queryset = KnowledgeBase.objects.all()
+    serializer_class = KnowledgeBaseSerializer
+>>>>>>> 0eeda1d0d1a6bc4895b71b00a464bebcffac2403

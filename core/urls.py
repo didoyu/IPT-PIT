@@ -9,12 +9,17 @@ from .views import (
     ChatbotView, KnowledgeBaseView
 )
 
+<<<<<<< HEAD
 
 
+=======
+from .views import ChatbotView, KnowledgeBaseView #FOR CHATBOT NIGGA
+>>>>>>> 0eeda1d0d1a6bc4895b71b00a464bebcffac2403
 import rest_framework.routers
 router = rest_framework.routers.SimpleRouter()
 router.register(r'exams', ExamViewSet)
 router.register(r'questions', QuestionViewSet)
+
 
 urlpatterns = [
     path('', include(router.urls)),
@@ -39,9 +44,14 @@ urlpatterns = [
     path('profile/request-email-change/', request_email_change, name='request-email-change'),
     path('profile/verify-email-change/', verify_email_change, name='verify-email-change'),
     path('profile/change-password/', change_password, name='change-password'),
+<<<<<<< HEAD
     path('chat/', ChatbotView.as_view(), name='chat'),
     path('v1/chat/', ChatbotView.as_view(), name='chat-v1'),
     path('knowledge/', KnowledgeBaseView.as_view(), name='knowledge'),
+=======
+    path('chat/', ChatbotView.as_view()),
+    path('knowledge/', KnowledgeBaseView.as_view()), #FOR CHATBOT NIGGA
+>>>>>>> 0eeda1d0d1a6bc4895b71b00a464bebcffac2403
 ]
 
 
