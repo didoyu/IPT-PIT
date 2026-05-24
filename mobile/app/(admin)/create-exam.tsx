@@ -4,7 +4,6 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  SafeAreaView,
   TextInput,
   TouchableOpacity,
   Alert,
@@ -47,7 +46,6 @@ export default function CreateExam() {
         }
       );
 
-      // Successfully pushes route dynamically with param mapping inside route group
       router.push({
         pathname: "/(admin)/add-question/[examId]",
         params: { examId: res.data.id },
@@ -58,8 +56,8 @@ export default function CreateExam() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
+    <View style={styles.container}>
+      <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
         <View style={styles.card}>
           <Text style={styles.title}>Setup New Exam</Text>
 
@@ -87,7 +85,6 @@ export default function CreateExam() {
             />
           </View>
 
-          {/* ACCESSIBLE STEPPER CONFIGURATION FOR PASSING BADGE THRESHOLD */}
           <View style={styles.thresholdContainer}>
             <View style={styles.thresholdHeader}>
               <Text style={styles.thresholdLabel}>Passing Threshold</Text>
@@ -120,13 +117,13 @@ export default function CreateExam() {
           </TouchableOpacity>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#f8fafc" },
-  scrollContent: { padding: 24, justifyContent: "center" },
+  scrollContent: { padding: 24 },
   card: { backgroundColor: "#ffffff", padding: 24, borderRadius: 32, borderWidth: 1, borderColor: "#e2e8f0", elevation: 2, shadowColor: "#0f172a", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.03, shadowRadius: 12 },
   title: { fontSize: 22, fontWeight: "900", color: "#0f172a", textTransform: "uppercase", letterSpacing: -0.5, marginBottom: 24 },
   inputGroup: { marginBottom: 20 },

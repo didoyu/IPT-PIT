@@ -4,7 +4,6 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  SafeAreaView,
   ActivityIndicator,
   TouchableOpacity,
 } from "react-native";
@@ -50,7 +49,6 @@ export default function ResultsTable() {
     fetchResults();
   }, []);
 
-  // Droplist context cleanups parsed safely
   useEffect(() => {
     if (!results || results.length === 0) return;
 
@@ -74,7 +72,6 @@ export default function ResultsTable() {
     setYears(uniqueYears);
   }, [results]);
 
-  // Reactive filters update logic 
   useEffect(() => {
     if (!results) return;
 
@@ -102,11 +99,10 @@ export default function ResultsTable() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <Text style={styles.title}>Student Results</Text>
 
-        {/* SECTION FILTERS HORIZONTAL ACCENT */}
         <Text style={styles.filterLabel}>Filter By Section</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterTray}>
           <TouchableOpacity
@@ -126,7 +122,6 @@ export default function ResultsTable() {
           ))}
         </ScrollView>
 
-        {/* YEAR FILTERS HORIZONTAL ACCENT */}
         <Text style={styles.filterLabel}>Filter By School Year</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterTray}>
           <TouchableOpacity
@@ -146,7 +141,6 @@ export default function ResultsTable() {
           ))}
         </ScrollView>
 
-        {/* COMPACT CLEAN CARD FEED */}
         <Text style={styles.sectionHeader}>Records ({filteredResults.length})</Text>
         {filteredResults.map((res) => {
           const totalQuestions = res.total_questions || 1;
@@ -194,7 +188,7 @@ export default function ResultsTable() {
           </View>
         )}
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -229,5 +223,5 @@ const styles = StyleSheet.create({
   scoreValue: { fontSize: 15, fontWeight: "900", color: "#4f46e5", marginTop: 2 },
   dateText: { fontSize: 10, fontWeight: "600", color: "#94a3b8", marginTop: 10, alignSelf: "flex-end" },
   emptyCard: { backgroundColor: "#ffffff", padding: 32, borderRadius: 24, alignItems: "center", borderWidth: 1, borderColor: "#e2e8f0" },
-  emptyText: { color: "#94a3b8", fontStyle: "italic", fontSize: 14 },
+  emptyText: { color: "#94a3b8", fontStyle: "italic" },
 });
