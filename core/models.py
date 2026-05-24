@@ -126,3 +126,65 @@ class LoginApproval(models.Model):
 
     def __str__(self):
         return f"Login for {self.user.username} (Approved: {self.is_approved})"
+
+
+# --- KNOWLEDGE BASE FOR CHATBOT ---
+class KnowledgeBase(models.Model):
+    title = models.CharField(max_length=255)
+    text_content = models.TextField(blank=True, null=True)
+    pdf_file = models.FileField(upload_to='pdfs/', null=True, blank=True)
+    website_url = models.URLField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title
+
+    def save(self, *args, **kwargs):
+        if not self.text_content:
+            extracted_text = ""
+            if self.pdf_file:
+                try:
+                    import pypdf
+                    reader = pypdf.PdfReader(self.pdf_file.file)
+                    for page in reader.pages:
+                        extracted_text += (page.extract_text() or "") + "\n"
+                except Exception as e:
+                    print(f"Error extracting PDF: {e}")
+                    extracted_text += f"\n[Error reading PDF: {e}]\n"
+            
+            if self.website_url:
+                try:
+                    import requests
+                    from bs4 import BeautifulSoup
+                    headers = {'User-Agent': 'Mozilla/5.0'}
+                    res = requests.get(self.website_url, headers=headers, timeout=10)
+                    if res.status_code == 200:
+                        soup = BeautifulSoup(res.text, 'html.parser')
+                        for s in soup(['script', 'style', 'nav', 'footer', 'header']):
+                            s.decompose()
+                        text = soup.get_text(separator=' ')
+                        cleaned_lines = [line.strip() for line in text.splitlines() if line.strip()]
+                        extracted_text += "\n".join(cleaned_lines)
+                except Exception as e:
+                    print(f"Error scraping website: {e}")
+                    extracted_text += f"\n[Error scraping URL: {e}]\n"
+            
+            if extracted_text.strip():
+                self.text_content = extracted_text.strip()
+        
+        super().save(*args, **kwargs)
+
+
+# --- CHATBOT MESSAGE ---
+class ChatMessage(models.Model):
+    ROLE_CHOICES = (
+        ('user', 'User'),
+        ('assistant', 'Assistant'),
+    )
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES)
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.role
+

@@ -25,7 +25,7 @@ export default function ResultsTable() {
     const fetchResults = async () => {
       try {
         const headers = await getHeaders();
-        const res = await axios.get('http://192.168.1.173:8000/api/admin-results/', { headers });
+        const res = await axios.get('http://192.168.1.42:8000/api/admin-results/', { headers });
         setResults(res.data);
         setFilteredResults(res.data);
       } catch (err) {

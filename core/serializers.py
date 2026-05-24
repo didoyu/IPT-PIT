@@ -79,3 +79,18 @@ class ExamSubmissionSerializer(serializers.Serializer):
             score=score,
             is_passed=passed
         )
+
+
+# --- CHATBOT & KNOWLEDGE BASE SERIALIZERS ---
+from .models import KnowledgeBase, ChatMessage
+
+class KnowledgeBaseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = KnowledgeBase
+        fields = '__all__'
+
+
+class ChatMessageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ChatMessage
+        fields = '__all__'

@@ -25,7 +25,7 @@ export default function CreateExam() {
     try {
       const token = await AsyncStorage.getItem('auth');
       const res = await axios.post(
-        'http://192.168.1.173:8000/api/exams/',
+        'http://192.168.1.42:8000/api/exams/',
         { title, description, pass_mark: passMark },
         { headers: { Authorization: `Token ${token}` } }
       );
@@ -47,7 +47,7 @@ export default function CreateExam() {
     <ScrollView style={styles.scroll} contentContainerStyle={styles.container}>
 
       {/* ✅ Back Button */}
-      <TouchableOpacity style={styles.backBtn} onPress={() => router.push('/admin/AdminDashboard')}>
+      <TouchableOpacity style={styles.backBtn} onPress={() => router.push('/admin/admin-dashboard')}>
         <Text style={styles.backBtnText}>← Back to Dashboard</Text>
       </TouchableOpacity>
 

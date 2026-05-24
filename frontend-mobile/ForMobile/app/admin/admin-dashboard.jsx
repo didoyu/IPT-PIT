@@ -6,7 +6,7 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { useRouter } from 'expo-router';
-import ResultsTable from './ResultsTable'; // ✅ adjust path if needed
+import ResultsTable from './results-table'; // ✅ adjust path if needed
 
 export default function AdminDashboard() {
   const [exams, setExams] = useState([]);
@@ -24,7 +24,7 @@ export default function AdminDashboard() {
   const fetchExams = async () => {
     try {
       const headers = await getHeaders();
-      const res = await axios.get('http://192.168.1.173:8000/api/exams/', { headers });
+      const res = await axios.get('http://192.168.1.42:8000/api/exams/', { headers });
       setExams(res.data);
     } catch (err) {
       console.error('Failed to fetch exams', err);
@@ -43,7 +43,7 @@ export default function AdminDashboard() {
   const confirmDelete = async () => {
     try {
       const headers = await getHeaders();
-      await axios.delete(`http://192.168.1.173:8000/api/exams/${examToDelete.id}/`, { headers });
+      await axios.delete(`http://192.168.1.42:8000/api/exams/${examToDelete.id}/`, { headers });
       setExams(exams.filter(e => e.id !== examToDelete.id));
       setShowDeleteModal(false);
       setExamToDelete(null);

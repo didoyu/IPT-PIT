@@ -103,7 +103,7 @@ export default function Register() {
         }
       });
 
-      await axios.post('http://192.168.1.173:8000/api/register/', data, {
+      await axios.post('http://192.168.1.42:8000/api/register/', data, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 

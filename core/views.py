@@ -9,6 +9,8 @@ from django.http import HttpResponse
 from rest_framework.authtoken.models import Token
 from rest_framework import serializers
 from rest_framework.decorators import api_view, permission_classes
+from django.core.exceptions import ValidationError
+
 
 
 from .models import Exam, Question, Option, ExamResult, Profile, PendingEmailChange, LoginApproval, PasswordResetCode
@@ -63,19 +65,27 @@ def register_view(request):
     user.is_active = False
     user.save()
 
-    Profile.objects.create(
-        user=user,
-        first_name=data.get('first_name'),
-        middle_name=data.get('middle_name', ''),
-        last_name=data.get('last_name'),
-        email=email,
-        section=section,
-        school_year=school_year,
-        address=address,
-        age=age,
-        birthday=birthday,
-        profile_picture=profile_picture
-    )
+    try:
+        Profile.objects.create(
+            user=user,
+            first_name=data.get('first_name'),
+            middle_name=data.get('middle_name', ''),
+            last_name=data.get('last_name'),
+            email=email,
+            section=section,
+            school_year=school_year,
+            address=address,
+            age=age,
+            birthday=birthday,
+            profile_picture=profile_picture
+        )
+    except ValidationError as e:
+        user.delete()
+        return Response({'error': f"Validation Error: {', '.join(e.messages)}"}, status=400)
+    except Exception as e:
+        user.delete()
+        return Response({'error': str(e)}, status=400)
+
 
     # ✅ SEND ACTIVATION EMAIL
     try:
@@ -606,4 +616,79 @@ def change_password(request):
     # Optional: If using Token auth, we don't need to re-authenticate the session,
     # but the user will need to use their new password next time they log in.
     return Response({'message': 'Password changed successfully'})
+
+
+# --- CHATBOT & KNOWLEDGE BASE VIEWS ---
+from rest_framework.generics import ListCreateAPIView
+from .models import KnowledgeBase, ChatMessage
+from .serializers import KnowledgeBaseSerializer, ChatMessageSerializer
+import requests
+
+class ChatbotView(ListCreateAPIView):
+    queryset = ChatMessage.objects.all().order_by('created_at')
+    serializer_class = ChatMessageSerializer
+    permission_classes = [AllowAny]
+
+    def create(self, request, *args, **kwargs):
+        user_message = request.data.get("message")
+        if not user_message:
+            return Response({"error": "Message is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # save user message
+        user_chat = ChatMessage.objects.create(
+            role='user',
+            message=user_message
+        )
+
+        # get knowledge base context
+        knowledge = KnowledgeBase.objects.all()
+        context = ""
+        for item in knowledge:
+            if item.text_content:
+                context += item.text_content + "\n"
+
+        prompt = f"""You are a helpful assistant.
+
+Knowledge:
+{context}
+
+User:
+{user_message}
+"""
+
+        try:
+            response = requests.post(
+                "http://localhost:11434/api/generate",
+                json={
+                    "model": "qwen2.5:0.5b",
+                    "prompt": prompt,
+                    "stream": False
+                },
+                timeout=15
+            )
+            if response.status_code == 200:
+                data = response.json()
+                ai_response = data.get("response", "No response content from model.")
+            else:
+                ai_response = f"Ollama returned status code {response.status_code}."
+        except Exception as e:
+            ai_response = f"Could not connect to Ollama. Please make sure Ollama is running locally and 'qwen2.5:0.5b' is downloaded. (Error: {str(e)})"
+
+        # save AI response
+        ai_chat = ChatMessage.objects.create(
+            role='assistant',
+            message=ai_response
+        )
+
+        return Response({
+            "user": ChatMessageSerializer(user_chat).data,
+            "assistant": ChatMessageSerializer(ai_chat).data
+        }, status=status.HTTP_201_CREATED)
+
+
+class KnowledgeBaseView(ListCreateAPIView):
+    queryset = KnowledgeBase.objects.all().order_by('-created_at')
+    serializer_class = KnowledgeBaseSerializer
+    permission_classes = [AllowAny]
+
 

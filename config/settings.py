@@ -12,7 +12,7 @@ SECRET_KEY = 'django-insecure-change-this-key-for-production'
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['.onrender.com', 'localhost', '127.0.0.1','192.168.1.173']
+ALLOWED_HOSTS = ['*', '.onrender.com', 'localhost', '127.0.0.1','192.168.1.173']
 
 
 # APPLICATIONS

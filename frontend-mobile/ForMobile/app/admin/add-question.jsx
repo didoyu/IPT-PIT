@@ -39,7 +39,7 @@ export default function AddQuestion() {
   const fetchExamData = async () => {
     try {
       const headers = await getHeaders();
-      const res = await axios.get(`http://192.168.1.173:8000/api/exams/${examId}/`, { headers });
+      const res = await axios.get(`http://192.168.1.42:8000/api/exams/${examId}/`, { headers });
       setQuestions(res.data.questions);
       setExamTitle(res.data.title);
     } catch (err) {
@@ -59,10 +59,10 @@ export default function AddQuestion() {
     try {
       const headers = await getHeaders();
       if (editingId) {
-        await axios.put(`http://192.168.1.173:8000/api/questions/${editingId}/`,
+        await axios.put(`http://192.168.1.42:8000/api/questions/${editingId}/`,
           { ...newQuestion, exam: examId }, { headers });
       } else {
-        await axios.post(`http://192.168.1.173:8000/api/questions/`,
+        await axios.post(`http://192.168.1.42:8000/api/questions/`,
           { ...newQuestion, exam: examId }, { headers });
       }
       handleCancelEdit();
@@ -106,7 +106,7 @@ export default function AddQuestion() {
   const handleDelete = async () => {
     try {
       const headers = await getHeaders();
-      await axios.delete(`http://192.168.1.173:8000/api/questions/${deleteQuestionId}/`, { headers });
+      await axios.delete(`http://192.168.1.42:8000/api/questions/${deleteQuestionId}/`, { headers });
       setShowDeleteModal(false);
       setDeleteQuestionId(null);
       fetchExamData();

@@ -5,8 +5,10 @@ from .views import (
     login_view, register_view, activate_account, admin_results_list, student_results_list, has_taken_exam, user_profile,
     update_profile, request_email_change, verify_email_change, change_password,
     verify_2fa_code, resend_2fa_code,
-    forgot_password, reset_password_with_code, resend_password_reset_code
+    forgot_password, reset_password_with_code, resend_password_reset_code,
+    ChatbotView, KnowledgeBaseView
 )
+
 
 
 import rest_framework.routers
@@ -37,5 +39,9 @@ urlpatterns = [
     path('profile/request-email-change/', request_email_change, name='request-email-change'),
     path('profile/verify-email-change/', verify_email_change, name='verify-email-change'),
     path('profile/change-password/', change_password, name='change-password'),
+    path('chat/', ChatbotView.as_view(), name='chat'),
+    path('v1/chat/', ChatbotView.as_view(), name='chat-v1'),
+    path('knowledge/', KnowledgeBaseView.as_view(), name='knowledge'),
 ]
+
 
