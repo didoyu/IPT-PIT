@@ -1,0 +1,56 @@
+erDiagram
+    USER ||--o{ PROFILE : has
+    USER ||--o{ EXAMRESULT : takes
+    SUBJECT ||--o{ EXAM : contains
+    EXAM ||--o{ QUESTION : includes
+    QUESTION ||--o{ OPTION : has
+    EXAM ||--o{ EXAMRESULT : produces
+
+    PROFILE {
+        int id PK
+        int user_id FK
+        string first_name
+        string middle_name
+        string last_name
+        string email
+        string section
+        string school_year
+        string address
+        int age
+        date birthday
+        string profile_picture
+    }
+    SUBJECT {
+        int id PK
+        string name
+    }
+    EXAM {
+        int id PK
+        int subject_id FK
+        string title
+        text description
+        int pass_mark
+        datetime created_at
+    }
+    QUESTION {
+        int id PK
+        int exam_id FK
+        text text
+        string question_type
+        text required_keywords
+    }
+    OPTION {
+        int id PK
+        int question_id FK
+        string text
+        bool is_correct
+    }
+    EXAMRESULT {
+        int id PK
+        int user_id FK
+        int exam_id FK
+        int score
+        bool is_passed
+        string section_at_time
+        datetime completed_at
+    }

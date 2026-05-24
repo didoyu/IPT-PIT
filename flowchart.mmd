@@ -1,0 +1,40 @@
+flowchart TD
+    A[Start] --> B[Open Application]
+    B --> C{Authenticated?}
+    C -- No --> D[Show Login / Register]
+    D --> E{Register or Login?}
+    E -- Register --> F[Submit Registration]
+    F --> G[Receive Activation Email]
+    G --> H[Activate Account]
+    H --> D
+    E -- Login --> I[Submit Credentials]
+    I --> J{Valid Credentials?}
+    J -- No --> K[Show Error]
+    K --> D
+    J -- Yes --> L[Check Role]
+    L --> M{Is Admin?}
+    M -- Yes --> N[Show Admin Dashboard]
+    M -- No --> O[Show Student Dashboard]
+
+    N --> P[Create Exam]
+    P --> Q[Fill Exam Details]
+    Q --> R[Save Exam to Database]
+    R --> N
+    N --> S[View All Results]
+    S --> T[Fetch Results]
+    T --> N
+
+    O --> U[View Available Exams]
+    U --> V[Select Exam]
+    V --> W[Load Exam Questions]
+    W --> X[Take Exam]
+    X --> Y[Submit Answers]
+    Y --> Z[Grade Exam & Save Results]
+    Z --> O
+    O --> AA[View My Results]
+    AA --> AB[Fetch Student Results]
+    AB --> O
+
+    N --> AC[Logout]
+    O --> AC
+    AC --> B

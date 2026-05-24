@@ -1,0 +1,25 @@
+usecaseDiagram
+    actor Student
+    actor Admin
+    actor System
+
+    Student --> (Register)
+    Student --> (Activate Account)
+    Student --> (Login)
+    Student --> (Select Exam)
+    Student --> (Take Exam)
+    Student --> (Submit Answers)
+    Student --> (View Results)
+
+    Admin --> (Login)
+    Admin --> (Create Exam)
+    Admin --> (Add Questions)
+    Admin --> (View All Results)
+
+    System --> (Send Activation Email)
+    System --> (Grade Exam)
+    System --> (Save Results)
+
+    (Activate Account) ..> (Send Activation Email) : includes
+    (Submit Answers) ..> (Grade Exam) : includes
+    (Grade Exam) ..> (Save Results) : includes
