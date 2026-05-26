@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { Settings } from 'lucide-react';
 
 export default function CreateExam() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [passMark, setPassMark] = useState(50); // State to handle the threshold
+  const [passMark, setPassMark] = useState(50);
   const navigate = useNavigate();
   const token = localStorage.getItem('auth');
 
@@ -15,11 +16,10 @@ export default function CreateExam() {
       const res = await axios.post('http://127.0.0.1:8000/api/exams/', {
         title,
         description,
-        pass_mark: passMark // Sending the manual threshold to Django
+        pass_mark: passMark
       }, {
         headers: { Authorization: `Token ${token}` }
       });
-      // Redirect to add questions for the new exam
       navigate(`/admin/add-question/${res.data.id}`);
     } catch (err) {
       alert("Error creating exam. Check if the server is running.");
@@ -27,15 +27,21 @@ export default function CreateExam() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-8">
-      <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm">
-        <h1 className="text-2xl font-black text-slate-800 mb-6 uppercase tracking-tight">Setup New Exam</h1>
+    <div className="max-w-2xl mx-auto p-6 md:p-8">
+      {/* WRAPPER INTEGRITY CONTAINER */}
+      <div className="bg-gradient-to-br from-white via-white to-purple-50/30 p-8 rounded-[32px] border border-purple-100/60 shadow-md">
+        <div className="flex items-center gap-2 mb-6">
+          <div className="p-2 bg-purple-50 text-purple-700 rounded-xl border border-purple-100">
+            <Settings size={18} />
+          </div>
+          <h1 className="text-2xl font-black text-slate-900 uppercase tracking-tight">Setup New Exam</h1>
+        </div>
         
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-xs font-black text-slate-400 uppercase mb-2">Exam Title</label>
+            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Exam Title Parameter</label>
             <input 
-              className="w-full p-4 border rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none font-medium"
+              className="w-full p-4 border border-slate-200 rounded-2xl focus:border-purple-500 focus:ring-4 focus:ring-purple-100 outline-none font-medium text-slate-800 transition-all text-sm"
               placeholder="e.g., CCNA: Subnetting Basics"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
@@ -44,21 +50,23 @@ export default function CreateExam() {
           </div>
 
           <div>
-            <label className="block text-xs font-black text-slate-400 uppercase mb-2">Instructions</label>
+            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Academic Instructions & Manifesto</label>
             <textarea 
-              className="w-full p-4 border rounded-2xl h-32 focus:ring-2 focus:ring-indigo-500 outline-none font-medium"
-              placeholder="Describe what the student needs to know..."
+              className="w-full p-4 border border-slate-200 rounded-2xl h-32 focus:border-purple-500 focus:ring-4 focus:ring-purple-100 outline-none font-medium text-slate-800 transition-all text-sm resize-none"
+              placeholder="Describe what rules, bounds, and references the system user or student needs to fully map out..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               required
             />
           </div>
 
-          {/* --- MANUAL THRESHOLD SETTING --- */}
-          <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100">
+          {/* DYNAMIC CONSOLE SLIDER MODULE */}
+          <div className="bg-purple-950/[0.02] p-6 rounded-2xl border border-purple-900/[0.05]">
             <div className="flex justify-between items-center mb-4">
-              <label className="text-sm font-bold text-slate-700 uppercase">Passing Threshold</label>
-              <span className="bg-indigo-600 text-white px-3 py-1 rounded-full font-black text-sm">{passMark}%</span>
+              <label className="text-xs font-black text-slate-700 uppercase tracking-wider">Passing Evaluation Threshold</label>
+              <span className="bg-purple-700 text-white px-3 py-1 rounded-full font-black text-xs tracking-wide shadow-sm shadow-purple-100">
+                {passMark}%
+              </span>
             </div>
             <input 
               type="range"
@@ -67,18 +75,18 @@ export default function CreateExam() {
               step="5"
               value={passMark}
               onChange={(e) => setPassMark(e.target.value)}
-              className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+              className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-purple-700 focus:outline-none"
             />
-            <p className="text-[10px] text-slate-400 mt-3 italic">
-              Students must reach this percentage to be marked as "PASSED."
+            <p className="text-[10px] text-slate-400 mt-3 font-medium italic">
+              Candidate instances must hit this specific processing ceiling value to generate a verified "PASSED" response marker flag.
             </p>
           </div>
 
           <button 
             type="submit" 
-            className="w-full bg-indigo-600 text-white py-4 rounded-2xl font-black text-lg hover:bg-indigo-700 transition shadow-lg shadow-indigo-100 uppercase tracking-widest"
+            className="w-full bg-purple-700 text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-purple-600 transition shadow-lg shadow-purple-100 hover:shadow-purple-200 active:scale-[0.99] pt-4"
           >
-            Create & Continue
+            Create Engine Instance & Continue
           </button>
         </form>
       </div>

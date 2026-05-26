@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, View, Image, TouchableOpacity, ActivityIndicator, Alert, SafeAreaView } from "react-native";
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { LogOut, ChevronRight, User } from "lucide-react-native";
+import { LogOut, ChevronRight } from "lucide-react-native";
 import api from "../../../services/api";
 
 interface ProfileData {
@@ -49,7 +49,8 @@ export default function ProfileHub() {
   if (loading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#4f46e5" />
+        {/* Color Sync: Deep Purple Loader */}
+        <ActivityIndicator size="large" color="#7e22ce" />
       </View>
     );
   }
@@ -59,7 +60,6 @@ export default function ProfileHub() {
       <View style={styles.content}>
         <Text style={styles.title}>Settings & Profile</Text>
 
-        {/* CLICKABLE USER ACCOUNT ROW */}
         <TouchableOpacity
           style={styles.profileCard}
           activeOpacity={0.7}
@@ -88,7 +88,7 @@ export default function ProfileHub() {
 
         <View style={styles.spacer} />
 
-        {/* LOGOUT BUTTON AT THE BOTTOM */}
+        {/* LOGOUT BUTTON CONTAINER */}
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout} activeOpacity={0.8}>
           <LogOut size={18} color="#ef4444" />
           <Text style={styles.logoutText}>Sign Out Account</Text>
@@ -103,9 +103,9 @@ const styles = StyleSheet.create({
   content: { flex: 1, padding: 24 },
   title: { fontSize: 24, fontWeight: "900", color: "#0f172a", textTransform: "uppercase", marginBottom: 24, marginTop: 16 },
   profileCard: { flexDirection: "row", alignItems: "center", backgroundColor: "#ffffff", padding: 16, borderRadius: 24, borderWidth: 1, borderColor: "#e2e8f0" },
-  avatarContainer: { width: 56, height: 56, borderRadius: 99, backgroundColor: "#e0e7ff", alignItems: "center", justifyContent: "center", overflow: "hidden" },
+  avatarContainer: { width: 56, height: 56, borderRadius: 99, backgroundColor: "#f3e8ff", alignItems: "center", justifyContent: "center", overflow: "hidden" },
   avatarImage: { width: "100%", height: "100%", resizeMode: "cover" },
-  avatarInitials: { fontSize: 18, fontWeight: "900", color: "#4f46e5", textTransform: "uppercase" },
+  avatarInitials: { fontSize: 18, fontWeight: "900", color: "#7e22ce", textTransform: "uppercase" }, // Color Sync
   profileMeta: { flex: 1, marginLeft: 16 },
   profileName: { fontSize: 16, fontWeight: "800", color: "#1e293b" },
   profileSub: { fontSize: 13, color: "#64748b", marginTop: 2, fontWeight: "500" },

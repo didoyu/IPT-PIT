@@ -2,7 +2,8 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import (
     ExamViewSet, QuestionViewSet, SubmitExamView, 
-    login_view, register_view, admin_results_list, student_results_list, has_taken_exam, user_profile
+    login_view, register_view, admin_results_list, student_results_list, has_taken_exam, user_profile,
+    chat_with_ollama  # ✅ NEW: Imported the chat view
 )
 
 router = DefaultRouter()
@@ -18,4 +19,7 @@ urlpatterns = [
     path('student-results/', student_results_list, name='student-results'),
     path('exams/<int:exam_id>/taken/', has_taken_exam),
     path('profile/', user_profile, name='profile'),
+    
+    # --- CHATBOT ROUTE ---
+    path('chat/', chat_with_ollama, name='chat_with_ollama'), # ✅ NEW: Chatbot endpoint mapping
 ]

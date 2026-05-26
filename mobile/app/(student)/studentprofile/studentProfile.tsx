@@ -49,7 +49,8 @@ export default function StudentProfileHub() {
   if (loading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#4f46e5" />
+        {/* 💜 COLOR SYNC: Swapped to brand deep purple loader */}
+        <ActivityIndicator size="large" color="#7e22ce" />
       </View>
     );
   }
@@ -63,7 +64,6 @@ export default function StudentProfileHub() {
         <TouchableOpacity
           style={styles.profileCard}
           activeOpacity={0.7}
-          // 👇 FIXED: Changed path from (admin) to your actual student route folder
           onPress={() => router.push("/(student)/studentprofile/studentDetails")}
         >
           <View style={styles.avatarContainer}>
@@ -104,9 +104,11 @@ const styles = StyleSheet.create({
   content: { flex: 1, padding: 24 },
   title: { fontSize: 24, fontWeight: "900", color: "#0f172a", textTransform: "uppercase", marginBottom: 24, marginTop: 16 },
   profileCard: { flexDirection: "row", alignItems: "center", backgroundColor: "#ffffff", padding: 16, borderRadius: 24, borderWidth: 1, borderColor: "#e2e8f0" },
-  avatarContainer: { width: 56, height: 56, borderRadius: 99, backgroundColor: "#e0e7ff", alignItems: "center", justifyContent: "center", overflow: "hidden" },
+  // 💜 COLOR SYNC: Swapped background container tint to match admin hue settings
+  avatarContainer: { width: 56, height: 56, borderRadius: 99, backgroundColor: "#f3e8ff", alignItems: "center", justifyContent: "center", overflow: "hidden" },
   avatarImage: { width: "100%", height: "100%", resizeMode: "cover" },
-  avatarInitials: { fontSize: 18, fontWeight: "900", color: "#4f46e5", textTransform: "uppercase" },
+  // 💜 COLOR SYNC: Updated initials text label color mapping
+  avatarInitials: { fontSize: 18, fontWeight: "900", color: "#7e22ce", textTransform: "uppercase" },
   profileMeta: { flex: 1, marginLeft: 16 },
   profileName: { fontSize: 16, fontWeight: "800", color: "#1e293b" },
   profileSub: { fontSize: 13, color: "#64748b", marginTop: 2, fontWeight: "500" },

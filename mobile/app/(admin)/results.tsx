@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Award } from "lucide-react-native";
 import api from "../../services/api";
 
 interface ExamRecord {
@@ -18,6 +19,7 @@ interface ExamRecord {
   exam_title: string;
   score: number;
   total_questions: number;
+  passed: boolean;
   date: string;
 }
 
@@ -26,7 +28,7 @@ export default function ResultsTable() {
   const [filteredResults, setFilteredResults] = useState<ExamRecord[]>([]);
   const [sections, setSections] = useState<string[]>([]);
   const [years, setYears] = useState<string[]>([]);
-  
+
   const [selectedSection, setSelectedSection] = useState("");
   const [selectedYear, setSelectedYear] = useState("");
   const [loading, setLoading] = useState(true);
@@ -79,11 +81,9 @@ export default function ResultsTable() {
       const matchSection = selectedSection
         ? r.section?.trim() === selectedSection.trim()
         : true;
-
       const matchYear = selectedYear
         ? r.school_year?.trim() === selectedYear.trim()
         : true;
-
       return matchSection && matchYear;
     });
 
@@ -93,42 +93,87 @@ export default function ResultsTable() {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#4f46e5" />
+        <ActivityIndicator size="large" color="#7e22ce" />
+        <Text style={styles.loadingText}>Loading results...</Text>
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        <Text style={styles.title}>Student Results</Text>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* HEADER */}
+        <View style={styles.headerBlock}>
+          <Text style={styles.headerTagline}>Student Data</Text>
+          <Text style={styles.title}>Results</Text>
+          <Text style={styles.headerSubtitle}>
+            Real-time scores and passing status of all exam attempts.
+          </Text>
+        </View>
 
+        {/* FILTER — SECTION */}
         <Text style={styles.filterLabel}>Filter By Section</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterTray}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.filterTray}
+        >
           <TouchableOpacity
             style={[styles.chip, selectedSection === "" && styles.activeChip]}
             onPress={() => setSelectedSection("")}
           >
-            <Text style={[styles.chipText, selectedSection === "" && styles.activeChipText]}>All Sections</Text>
+            <Text
+              style={[
+                styles.chipText,
+                selectedSection === "" && styles.activeChipText,
+              ]}
+            >
+              All Sections
+            </Text>
           </TouchableOpacity>
           {sections.map((sec) => (
             <TouchableOpacity
               key={sec}
-              style={[styles.chip, selectedSection === sec && styles.activeChip]}
+              style={[
+                styles.chip,
+                selectedSection === sec && styles.activeChip,
+              ]}
               onPress={() => setSelectedSection(sec)}
             >
-              <Text style={[styles.chipText, selectedSection === sec && styles.activeChipText]}>{sec}</Text>
+              <Text
+                style={[
+                  styles.chipText,
+                  selectedSection === sec && styles.activeChipText,
+                ]}
+              >
+                {sec}
+              </Text>
             </TouchableOpacity>
           ))}
         </ScrollView>
 
+        {/* FILTER — YEAR */}
         <Text style={styles.filterLabel}>Filter By School Year</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterTray}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.filterTray}
+        >
           <TouchableOpacity
             style={[styles.chip, selectedYear === "" && styles.activeChip]}
             onPress={() => setSelectedYear("")}
           >
-            <Text style={[styles.chipText, selectedYear === "" && styles.activeChipText]}>All Years</Text>
+            <Text
+              style={[
+                styles.chipText,
+                selectedYear === "" && styles.activeChipText,
+              ]}
+            >
+              All Years
+            </Text>
           </TouchableOpacity>
           {years.map((yr) => (
             <TouchableOpacity
@@ -136,28 +181,59 @@ export default function ResultsTable() {
               style={[styles.chip, selectedYear === yr && styles.activeChip]}
               onPress={() => setSelectedYear(yr)}
             >
-              <Text style={[styles.chipText, selectedYear === yr && styles.activeChipText]}>{yr}</Text>
+              <Text
+                style={[
+                  styles.chipText,
+                  selectedYear === yr && styles.activeChipText,
+                ]}
+              >
+                {yr}
+              </Text>
             </TouchableOpacity>
           ))}
         </ScrollView>
 
-        <Text style={styles.sectionHeader}>Records ({filteredResults.length})</Text>
+        {/* RECORDS COUNT */}
+        <Text style={styles.sectionHeader}>
+          Records ({filteredResults.length})
+        </Text>
+
+        {/* RESULT CARDS */}
         {filteredResults.map((res) => {
-          const totalQuestions = res.total_questions || 1;
-          const percentage = (res.score / totalQuestions) * 100;
-          const isPassed = percentage >= 50;
+          // Trust server-computed passed field — consistent with web
+          const isPassed = res.passed;
 
           return (
             <View key={res.id} style={styles.resultCard}>
+              {/* Accent strip matching web card style */}
+              <View style={styles.cardAccentStrip} />
+
               <View style={styles.cardTopRow}>
-                <View>
+                <View style={{ flex: 1, paddingRight: 10 }}>
                   <Text style={styles.studentName}>{res.student_name}</Text>
                   <Text style={styles.metaText}>
                     Section {res.section} • {res.school_year}
                   </Text>
                 </View>
-                <View style={[styles.statusBadge, isPassed ? styles.passBadge : styles.failBadge]}>
-                  <Text style={[styles.statusBadgeText, isPassed ? styles.passBadgeText : styles.failBadgeText]}>
+                <View
+                  style={[
+                    styles.statusBadge,
+                    isPassed ? styles.passBadge : styles.failBadge,
+                  ]}
+                >
+                  {isPassed && (
+                    <Award
+                      size={10}
+                      color="#16a34a"
+                      style={{ marginRight: 4 }}
+                    />
+                  )}
+                  <Text
+                    style={[
+                      styles.statusBadgeText,
+                      isPassed ? styles.passBadgeText : styles.failBadgeText,
+                    ]}
+                  >
                     {isPassed ? "PASSED" : "FAILED"}
                   </Text>
                 </View>
@@ -168,15 +244,20 @@ export default function ResultsTable() {
               <View style={styles.cardBottomRow}>
                 <View style={{ flex: 1, paddingRight: 8 }}>
                   <Text style={styles.examTitleLabel}>Exam Module</Text>
-                  <Text style={styles.examTitleText} numberOfLines={1}>{res.exam_title}</Text>
+                  <Text style={styles.examTitleText} numberOfLines={1}>
+                    {res.exam_title}
+                  </Text>
                 </View>
                 <View style={styles.scoreContainer}>
                   <Text style={styles.scoreLabel}>Score</Text>
                   <Text style={styles.scoreValue}>
-                    {res.score}/{res.total_questions}
+                    {res.score}
+                    <Text style={styles.scoreDivider}>/</Text>
+                    {res.total_questions}
                   </Text>
                 </View>
               </View>
+
               <Text style={styles.dateText}>{res.date}</Text>
             </View>
           );
@@ -184,7 +265,9 @@ export default function ResultsTable() {
 
         {filteredResults.length === 0 && (
           <View style={styles.emptyCard}>
-            <Text style={styles.emptyText}>No exams match the selected filters.</Text>
+            <Text style={styles.emptyText}>
+              No active exam result sequences match the selected filters.
+            </Text>
           </View>
         )}
       </ScrollView>
@@ -194,34 +277,191 @@ export default function ResultsTable() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#f8fafc" },
-  scrollContent: { padding: 24 },
+  scrollContent: { padding: 16, paddingBottom: 40 },
+
   loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
-  title: { fontSize: 24, fontWeight: "900", color: "#0f172a", textTransform: "uppercase", marginBottom: 20 },
-  filterLabel: { fontSize: 10, fontWeight: "900", color: "#94a3b8", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 8 },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 12,
+    fontWeight: "700",
+    color: "#9333ea",
+    textTransform: "uppercase",
+    letterSpacing: 1,
+  },
+
+  // Header — matches AdminDashboard header style
+  headerBlock: {
+    backgroundColor: "rgba(243, 232, 255, 0.5)",
+    borderRadius: 24,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: "rgba(126, 34, 206, 0.12)",
+    marginBottom: 24,
+  },
+  headerTagline: {
+    fontSize: 10,
+    fontWeight: "900",
+    color: "#7e22ce",
+    textTransform: "uppercase",
+    letterSpacing: 1.2,
+    marginBottom: 4,
+  },
+  title: {
+    fontSize: 26,
+    fontWeight: "900",
+    color: "#0f172a",
+    textTransform: "uppercase",
+  },
+  headerSubtitle: {
+    fontSize: 13,
+    color: "#64748b",
+    marginTop: 4,
+    lineHeight: 18,
+  },
+
+  // Filters
+  filterLabel: {
+    fontSize: 10,
+    fontWeight: "900",
+    color: "#94a3b8",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+    marginBottom: 8,
+  },
   filterTray: { flexDirection: "row", marginBottom: 16 },
-  chip: { backgroundColor: "#ffffff", paddingHorizontal: 14, paddingVertical: 8, borderRadius: 12, marginRight: 8, borderWidth: 1, borderColor: "#e2e8f0" },
-  activeChip: { backgroundColor: "#4f46e5", borderColor: "#4f46e5" },
+  chip: {
+    backgroundColor: "#ffffff",
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 12,
+    marginRight: 8,
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+  },
+  activeChip: { backgroundColor: "#7e22ce", borderColor: "#7e22ce" },
   chipText: { fontSize: 13, fontWeight: "700", color: "#64748b" },
   activeChipText: { color: "#ffffff" },
-  sectionHeader: { fontSize: 11, fontWeight: "900", color: "#94a3b8", textTransform: "uppercase", letterSpacing: 1, marginTop: 12, marginBottom: 14 },
-  resultCard: { backgroundColor: "#ffffff", borderRadius: 24, padding: 18, marginBottom: 14, borderWidth: 1, borderColor: "#f1f5f9", elevation: 2, shadowColor: "#0f172a", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.03, shadowRadius: 6 },
-  cardTopRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+
+  sectionHeader: {
+    fontSize: 11,
+    fontWeight: "900",
+    color: "#94a3b8",
+    textTransform: "uppercase",
+    letterSpacing: 1,
+    marginTop: 4,
+    marginBottom: 14,
+  },
+
+  // Result Cards
+  resultCard: {
+    backgroundColor: "#ffffff",
+    borderRadius: 24,
+    padding: 18,
+    marginBottom: 14,
+    borderWidth: 1,
+    borderColor: "rgba(126, 34, 206, 0.12)",
+    elevation: 1,
+    shadowColor: "#0f172a",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.03,
+    shadowRadius: 4,
+    position: "relative",
+    overflow: "hidden",
+  },
+  // Top accent strip — mirrors web card & admin exam card style
+  cardAccentStrip: {
+    position: "absolute",
+    top: 0,
+    left: 20,
+    width: 36,
+    height: 3.5,
+    backgroundColor: "#7e22ce",
+    borderBottomLeftRadius: 4,
+    borderBottomRightRadius: 4,
+  },
+
+  cardTopRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: 6,
+  },
   studentName: { fontSize: 16, fontWeight: "800", color: "#0f172a" },
   metaText: { fontSize: 12, fontWeight: "600", color: "#64748b", marginTop: 2 },
-  statusBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 99 },
-  passBadge: { backgroundColor: "#dcfce7" },
-  failBadge: { backgroundColor: "#fee2e2" },
+
+  statusBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 99,
+    borderWidth: 1,
+  },
+  passBadge: { backgroundColor: "#f0fdf4", borderColor: "rgba(22,163,74,0.2)" },
+  failBadge: { backgroundColor: "#fef2f2", borderColor: "rgba(220,38,38,0.2)" },
   statusBadgeText: { fontSize: 10, fontWeight: "900" },
   passBadgeText: { color: "#16a34a" },
   failBadgeText: { color: "#dc2626" },
-  divider: { height: 1, backgroundColor: "#f1f5f9", marginVertical: 12 },
-  cardBottomRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
-  examTitleLabel: { fontSize: 9, fontWeight: "800", color: "#94a3b8", textTransform: "uppercase" },
-  examTitleText: { fontSize: 14, fontWeight: "700", color: "#334155", marginTop: 2 },
+
+  divider: {
+    height: 1,
+    backgroundColor: "#f1f5f9",
+    marginVertical: 12,
+  },
+
+  cardBottomRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  examTitleLabel: {
+    fontSize: 9,
+    fontWeight: "800",
+    color: "#94a3b8",
+    textTransform: "uppercase",
+  },
+  examTitleText: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#334155",
+    marginTop: 2,
+  },
+
   scoreContainer: { alignItems: "flex-end" },
-  scoreLabel: { fontSize: 9, fontWeight: "800", color: "#94a3b8", textTransform: "uppercase" },
-  scoreValue: { fontSize: 15, fontWeight: "900", color: "#4f46e5", marginTop: 2 },
-  dateText: { fontSize: 10, fontWeight: "600", color: "#94a3b8", marginTop: 10, alignSelf: "flex-end" },
-  emptyCard: { backgroundColor: "#ffffff", padding: 32, borderRadius: 24, alignItems: "center", borderWidth: 1, borderColor: "#e2e8f0" },
-  emptyText: { color: "#94a3b8", fontStyle: "italic" },
+  scoreLabel: {
+    fontSize: 9,
+    fontWeight: "800",
+    color: "#94a3b8",
+    textTransform: "uppercase",
+  },
+  scoreValue: {
+    fontSize: 15,
+    fontWeight: "900",
+    color: "#7e22ce",
+    marginTop: 2,
+  },
+  scoreDivider: { color: "#cbd5e1", fontWeight: "400", fontSize: 12 },
+
+  dateText: {
+    fontSize: 10,
+    fontWeight: "600",
+    color: "#94a3b8",
+    marginTop: 10,
+    alignSelf: "flex-end",
+  },
+
+  emptyCard: {
+    backgroundColor: "#ffffff",
+    padding: 32,
+    borderRadius: 24,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+  },
+  emptyText: {
+    color: "#94a3b8",
+    fontStyle: "italic",
+    fontSize: 13,
+    textAlign: "center",
+  },
 });

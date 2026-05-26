@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Tabs, useRouter } from "expo-router";
 import { FontAwesome } from "@expo/vector-icons";
-import { View, Text, StyleSheet, TouchableOpacity, Alert, ActivityIndicator } from "react-native";
+import { View, Text, StyleSheet, Alert, ActivityIndicator } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function StudentLayout() {
@@ -17,13 +17,11 @@ export default function StudentLayout() {
         const isStaff = await AsyncStorage.getItem("isStaff");
         const storedUser = await AsyncStorage.getItem("user");
 
-        // 1. If no auth token, redirect to login
         if (!token) {
           router.replace("/login");
           return;
         }
 
-        // 2. If user is staff, route them back up to administrative dashboards
         if (isStaff === "true") {
           Alert.alert("Access Denied", "Administrators cannot directly look into student testing modules.");
           router.replace("/(admin)/dashboard");
@@ -43,16 +41,10 @@ export default function StudentLayout() {
     checkStudentAuth();
   }, []);
 
-  // 🚪 LOGOUT METHOD
-  const handleLogout = async () => {
-    await AsyncStorage.clear();
-    router.replace("/login");
-  };
-
   if (checkingAuth) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#4f46e5" />
+        <ActivityIndicator size="large" color="#7e22ce" />
       </View>
     );
   }
@@ -60,30 +52,29 @@ export default function StudentLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: "#4f46e5",
+        tabBarActiveTintColor: "#7e22ce",
         tabBarInactiveTintColor: "#64748b",
         tabBarStyle: styles.tabBar,
         headerStyle: styles.globalHeader,
         headerShadowVisible: false,
         headerTitle: "",
         
-        // LEFT SIDE: Your branded web logo replica
+        // LEFT SIDE: Branded Logo Layout
         headerLeft: () => (
           <View style={styles.logoContainer}>
-            <Text style={styles.logoMain}>EXAM</Text>
-            <Text style={styles.logoSub}>SYS</Text>
+            <View style={styles.logoTextGroup}>
+              <Text style={styles.logoMain}>EXAM</Text>
+              <Text style={styles.logoSub}>SYS</Text>
+            </View>
           </View>
         ),
 
-        // RIGHT SIDE: Student Info Greeting & Logout Icon Box
+        // RIGHT SIDE: Profile Greeting Only (Logout Removed)
         headerRight: () => (
           <View style={styles.headerRightContainer}>
             <Text style={styles.welcomeText}>
               Hi, <Text style={styles.usernameBold}>{username}</Text>
             </Text>
-            <TouchableOpacity onPress={handleLogout} activeOpacity={0.7} style={styles.logoutIconButton}>
-              <FontAwesome name="sign-out" size={16} color="#ef4444" />
-            </TouchableOpacity>
           </View>
         ),
       }}
@@ -116,7 +107,7 @@ export default function StudentLayout() {
         name="take-exam/[id]"
         options={{
           href: null,
-          headerShown: false, // Hides header entirely during active tests
+          headerShown: false,
         }}
       />
     </Tabs>
@@ -125,55 +116,51 @@ export default function StudentLayout() {
 
 const styles = StyleSheet.create({
   globalHeader: {
-    backgroundColor: "#ffffff",
+    backgroundColor: "#2e1065", 
     borderBottomWidth: 1,
-    borderBottomColor: "#e2e8f0",
+    borderBottomColor: "#4c1d95", 
     height: 64,
   },
   logoContainer: {
     flexDirection: "row",
     alignItems: "center",
-    paddingLeft: 24,
+    paddingLeft: 16,
+  },
+  logoTextGroup: {
+    flexDirection: "row",
+    alignItems: "center",
   },
   logoMain: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: "900",
-    color: "#4f46e5",
+    color: "#ffffff", 
     letterSpacing: -0.5,
   },
   logoSub: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: "900",
-    color: "#0f172a",
+    color: "#c084fc", 
     letterSpacing: -0.5,
   },
   headerRightContainer: {
     flexDirection: "row",
     alignItems: "center",
-    paddingRight: 24,
-    gap: 12,
+    paddingRight: 16,
   },
   welcomeText: {
     fontSize: 13,
-    color: "#64748b",
+    color: "#c084fc", 
     fontWeight: "500",
   },
   usernameBold: {
     fontWeight: "800",
-    color: "#0f172a",
-  },
-  logoutIconButton: {
-    backgroundColor: "#fef2f2",
-    padding: 8,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: "#fee2e2",
+    color: "#ffffff", 
   },
   tabBar: {
     backgroundColor: "#ffffff",
     borderTopWidth: 1,
     borderTopColor: "#e2e8f0",
-    height: 64,
+    height: 64, 
     paddingBottom: 10,
     paddingTop: 8,
   },

@@ -6,11 +6,11 @@ import {
   ScrollView,
   SafeAreaView,
   ActivityIndicator,
-  TouchableOpacity, // ✅ Added for the logout action button
+  TouchableOpacity,
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
-import { useRouter } from "expo-router"; // ✅ Added to handle redirection
+import { useRouter } from "expo-router"; 
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Award, Layers, CheckCircle2, AlertCircle } from 'lucide-react-native';
 import api from "../../services/api";
 
 interface ExamResult {
@@ -25,13 +25,12 @@ interface ExamResult {
 export default function StudentDashboard() {
   const [results, setResults] = useState<ExamResult[]>([]);
   const [loading, setLoading] = useState(true);
-  const router = useRouter(); // ✅ Initialize router instance
+  const router = useRouter(); 
 
   useEffect(() => {
     const fetchResults = async () => {
       try {
         const token = await AsyncStorage.getItem("auth");
-        
         const res = await api.get("student-results/", {
           headers: { 
             Authorization: `Token ${token}` 
@@ -48,316 +47,238 @@ export default function StudentDashboard() {
     fetchResults();
   }, []);
 
-  // ✅ Wipes local storage clear and sends you straight back to the sign-in prompt
-  const handleLogout = async () => {
-    try {
-      await AsyncStorage.clear();
-      router.replace("/login"); // Adjust to "/" if your login file is standard index route
-    } catch (err) {
-      console.error("Logout Error:", err);
-    }
-  };
-
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#4f46e5" />
-        <Text style={styles.loadingText}>Loading Results...</Text>
+      <View style={styles.centered}>
+        <Text style={styles.loaderText}>Synchronizing Academic Registry...</Text>
+        <ActivityIndicator size="small" color="#7e22ce" style={{ marginTop: 10 }} />
       </View>
     );
   }
 
   return (
-    <LinearGradient
-      colors={["#f8fafc", "#f1f5f9"]}
-      style={styles.container}
-    >
-      <SafeAreaView style={styles.safeArea}>
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-        >
-          {/* Header Section */}
-          <View style={styles.header}>
-            {/* ✅ Flex layout to split the Title text and the Action button cleanly */}
-            <View style={styles.headerTopRow}>
-              <Text style={styles.title}>My Results</Text>
-              
-              <TouchableOpacity 
-                style={styles.logoutButton} 
-                onPress={handleLogout}
-                activeOpacity={0.7}
-              >
-                <Text style={styles.logoutButtonText}>Log Out</Text>
-              </TouchableOpacity>
+    <SafeAreaView style={styles.container}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* 🔮 UNIFIED CAPSULE HEADER PANEL */}
+        <View style={styles.headerBlock}>
+          <View style={styles.headerTopRow}>
+            <View style={styles.badgeRow}>
+              <Award size={14} color="#7e22ce" style={styles.headerIcon} />
+              <Text style={styles.headerTagline}>Academic Records</Text>
             </View>
-            
-            <Text style={styles.subtitle}>
-              Track your performance and completed modules.
-            </Text>
           </View>
+          
+          <Text style={styles.headerTitle}>My Results</Text>
+          <Text style={styles.headerSubtitle}>
+            Track real-time baseline completions and evaluate score metrics.
+          </Text>
+        </View>
 
-          {/* Performance History Section */}
-          <View style={styles.sectionContainer}>
-            <Text style={styles.sectionHeader}>Performance History</Text>
-            
-            {results.length === 0 ? (
-              <View style={styles.emptyCard}>
-                <Text style={styles.emptyText}>No exam attempts recorded yet.</Text>
-              </View>
-            ) : (
-              results.map((res) => {
-                const totalQuestions = res.total_questions || 1;
-                const percentage = (res.score / totalQuestions) * 100;
-                const threshold = res.pass_mark || 50;
-                const isPassed = percentage >= threshold;
+        {/* METRICS TRACK BAR */}
+        <View style={styles.trackBar}>
+          <View style={styles.trackBadge}>
+            <Layers size={13} color="#7e22ce" style={{ marginRight: 5 }} />
+            <Text style={styles.trackBadgeText}>Performance History Engine</Text>
+          </View>
+        </View>
 
-                return (
-                  <View key={res.id} style={styles.card}>
-                    {/* Top Row: Title & Status Badge */}
-                    <View style={styles.cardHeader}>
-                      <View style={styles.titleWrapper}>
-                        <Text style={styles.examTitle}>{res.exam_title}</Text>
-                        <Text style={styles.dateText}>{res.date}</Text>
-                      </View>
-                      
-                      <View style={styles.statusWrapper}>
-                        <View
-                          style={[
-                            styles.badge,
-                            isPassed ? styles.badgeSuccess : styles.badgeFail,
-                          ]}
-                        >
-                          <Text
-                            style={[
-                              styles.badgeText,
-                              isPassed ? styles.badgeTextSuccess : styles.badgeTextFail,
-                            ]}
-                          >
-                            {isPassed ? "MODULE COMPLETED" : "RETAKE REQUIRED"}
-                          </Text>
-                        </View>
-                        <Text style={styles.scoreText}>
-                          {res.score} / {res.total_questions} Points
-                        </Text>
-                      </View>
-                    </View>
+        {/* PERFORMANCE CARDS GRID CONTAINER */}
+        {results.length === 0 ? (
+          <View style={styles.emptyCard}>
+            <Text style={styles.emptyTextSub}>No verification tokens found.</Text>
+          </View>
+        ) : (
+          results.map((res) => {
+            const totalQuestions = res.total_questions || 1;
+            const percentage = (res.score / totalQuestions) * 100;
+            const threshold = res.pass_mark || 50;
+            const isPassed = percentage >= threshold;
 
-                    {/* Progress Bar Track */}
-                    <View style={styles.progressBarTrack}>
-                      <View
-                        style={[
-                          styles.progressBarFill,
-                          isPassed ? styles.fillSuccess : styles.fillFail,
-                          { width: `${Math.min(percentage, 100)}%` },
-                        ]}
-                      />
-                    </View>
+            return (
+              <View key={res.id} style={styles.examCard}>
+                {/* Top Decorative Accent Strip */}
+                <View style={[styles.cardAccentStrip, isPassed ? styles.stripSuccess : styles.stripFail]} />
 
-                    {/* Bottom Row: Score Stats */}
-                    <View style={styles.cardFooter}>
-                      <Text style={styles.achievedText}>
-                        ACHIEVED: {percentage.toFixed(0)}%
-                      </Text>
-                      <Text style={styles.requiredText}>
-                        REQUIRED: {threshold}%
-                      </Text>
-                    </View>
+                {/* Card Top Meta Row */}
+                <View style={styles.cardTopMeta}>
+                  <View
+                    style={[
+                      styles.statusBadge,
+                      isPassed ? styles.badgeSuccess : styles.badgeFail,
+                    ]}
+                  >
+                    {isPassed ? (
+                      <CheckCircle2 size={10} color="#16a34a" style={{ marginRight: 4 }} />
+                    ) : (
+                      <AlertCircle size={10} color="#dc2626" style={{ marginRight: 4 }} />
+                    )}
+                    <Text
+                      style={[
+                        styles.badgeText,
+                        isPassed ? styles.badgeTextSuccess : styles.badgeTextFail,
+                      ]}
+                    >
+                      {isPassed ? "PASSED" : "RETAKE"}
+                    </Text>
                   </View>
-                );
-              })
-            )}
-          </View>
-        </ScrollView>
-      </SafeAreaView>
-    </LinearGradient>
+                  
+                  <Text style={styles.examIdText}>{res.date}</Text>
+                </View>
+
+                {/* Core Module Title */}
+                <Text style={styles.examTitle}>{res.exam_title}</Text>
+                
+                {/* Score Summary Block */}
+                <Text style={styles.scoreSummaryText}>
+                  {res.score} / {res.total_questions} Points
+                </Text>
+
+                {/* Progress Rail Alignment */}
+                <View style={styles.progressBarTrack}>
+                  <View
+                    style={[
+                      styles.progressBarFill,
+                      isPassed ? styles.fillSuccess : styles.fillFail,
+                      { width: `${Math.min(percentage, 100)}%` },
+                    ]}
+                  />
+                </View>
+
+                {/* Refined Metric Footer Layout */}
+                <View style={styles.cardFooter}>
+                  <View style={styles.footerMetricWrapper}>
+                    <Text style={styles.metricLabel}>Achieved</Text>
+                    <Text style={styles.metricValueText}>{percentage.toFixed(0)}%</Text>
+                  </View>
+                  
+                  <View style={[styles.footerMetricWrapper, { alignItems: 'flex-end' }]}>
+                    <Text style={styles.metricLabel}>Req.</Text>
+                    <Text style={styles.purpleBoldText}>{threshold}%</Text>
+                  </View>
+                </View>
+              </View>
+            );
+          })
+        )}
+      </ScrollView>
+
+      {/* 💬 FLOATING CHATBOT ACTION ICON */}
+      <TouchableOpacity 
+        style={styles.fab} 
+        onPress={() => router.push('/chatbotMobile')}
+        activeOpacity={0.8}
+      >
+        <Text style={styles.fabIcon}>💬</Text>
+      </TouchableOpacity>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  safeArea: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: 24,
-    paddingTop: 30,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#f8fafc",
-  },
-  loadingText: {
-    marginTop: 12,
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#64748b",
-  },
-  header: {
-    marginBottom: 32,
-  },
-  headerTopRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  logoutButton: {
-    backgroundColor: "#fee2e2",
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "#fecaca",
-  },
-  logoutButtonText: {
-    color: "#dc2626",
-    fontSize: 11,
-    fontWeight: "800",
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: "900",
-    color: "#0f172a",
-    letterSpacing: -0.5,
-    textTransform: "uppercase",
-  },
-  subtitle: {
-    marginTop: 8,
-    fontSize: 15,
-    fontWeight: "500",
-    color: "#64748b",
-    lineHeight: 22,
-  },
-  sectionContainer: {
-    flex: 1,
-  },
-  sectionHeader: {
-    fontSize: 12,
-    fontWeight: "900",
-    color: "#94a3b8",
-    letterSpacing: 1.5,
-    textTransform: "uppercase",
-    marginBottom: 16,
-  },
-  emptyCard: {
-    backgroundColor: "#ffffff",
-    borderRadius: 24,
-    padding: 30,
-    borderWidth: 1,
-    borderColor: "#e2e8f0",
-    alignItems: "center",
-  },
-  emptyText: {
-    color: "#94a3b8",
-    fontStyle: "italic",
-    fontSize: 14,
-  },
-  card: {
-    backgroundColor: "#ffffff",
+  container: { flex: 1, backgroundColor: '#f8fafc' },
+  scrollContent: { padding: 16, paddingBottom: 110 },
+  centered: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#f8fafc' },
+  loaderText: { fontSize: 10, fontWeight: '900', color: '#7e22ce', textTransform: 'uppercase', letterSpacing: 1.2 },
+
+  // 🔮 Capsule Header Architecture Block
+  headerBlock: {
+    backgroundColor: 'rgba(243, 232, 255, 0.5)',
     borderRadius: 24,
     padding: 20,
-    marginBottom: 16,
     borderWidth: 1,
-    borderColor: "#f1f5f9",
-    elevation: 2,
-    shadowColor: "#0f172a",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 8,
-  },
-  cardHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    marginBottom: 16,
-  },
-  titleWrapper: {
-    flex: 1,
-    paddingRight: 12,
-  },
-  examTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#1e293b",
-    lineHeight: 24,
-  },
-  dateText: {
-    marginTop: 4,
-    fontSize: 10,
-    fontWeight: "700",
-    color: "#94a3b8",
-    textTransform: "uppercase",
-  },
-  statusWrapper: {
-    alignItems: "flex-end",
-  },
-  badge: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 99,
-  },
-  badgeSuccess: {
-    backgroundColor: "#dcfce7",
-  },
-  badgeFail: {
-    backgroundColor: "#fee2e2",
-  },
-  badgeText: {
-    fontSize: 9,
-    fontWeight: "900",
-    letterSpacing: -0.2,
-  },
-  badgeTextSuccess: {
-    color: "#16a34a",
-  },
-  badgeTextFail: {
-    color: "#dc2626",
-  },
-  scoreText: {
-    fontSize: 13,
-    fontWeight: "900",
-    color: "#475569",
+    borderColor: 'rgba(126, 34, 206, 0.12)',
+    marginBottom: 20,
     marginTop: 8,
   },
-  progressBarTrack: {
-    height: 14,
-    backgroundColor: "#f1f5f9",
-    borderRadius: 99,
-    overflow: "hidden",
-    borderWidth: 1,
-    borderColor: "#f8fafc",
+  headerTopRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 8 },
+  badgeRow: { flexDirection: 'row', alignItems: 'center' },
+  headerIcon: { marginRight: 4 },
+  headerTagline: { fontSize: 10, fontWeight: '900', color: '#7e22ce', textTransform: 'uppercase', letterSpacing: 1.2 },
+  headerTitle: { fontSize: 26, fontWeight: '900', color: '#0f172a', textTransform: 'uppercase' },
+  headerSubtitle: { fontSize: 13, color: '#64748b', marginTop: 4, lineHeight: 18 },
+
+  // Engine Status Track Strip
+  trackBar: { flexDirection: 'row', marginBottom: 16, paddingHorizontal: 4 },
+  trackBadge: { backgroundColor: '#ffffff', borderWidth: 1, borderColor: '#e2e8f0', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12, flexDirection: 'row', alignItems: 'center' },
+  trackBadgeText: { fontSize: 10, fontWeight: '900', color: '#475569', letterSpacing: 0.5, textTransform: 'uppercase' },
+
+  // Exam Result Structural Architecture Cards
+  examCard: { 
+    backgroundColor: '#ffffff', 
+    borderRadius: 24, 
+    padding: 20, 
+    marginBottom: 14, 
+    borderWidth: 1, 
+    borderColor: 'rgba(126, 34, 206, 0.12)', 
+    position: 'relative', 
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.03,
+    shadowRadius: 3,
+    elevation: 1 
   },
-  progressBarFill: {
-    height: "100%",
-    borderRadius: 99,
+  cardAccentStrip: { position: 'absolute', top: 0, left: 24, width: 40, height: 3.5, borderBottomLeftRadius: 4, borderBottomRightRadius: 4 },
+  stripSuccess: { backgroundColor: '#10b981' },
+  stripFail: { backgroundColor: '#ef4444' },
+  cardTopMeta: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
+  
+  // Custom Action Status Badges
+  statusBadge: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6, borderWidth: 1 },
+  badgeSuccess: { backgroundColor: '#f0fdf4', borderColor: 'rgba(22, 163, 74, 0.2)' },
+  badgeFail: { backgroundColor: '#fef2f2', borderColor: 'rgba(220, 38, 38, 0.2)' },
+  badgeText: { fontSize: 9, fontWeight: '900', letterSpacing: 0.5 },
+  badgeTextSuccess: { color: '#16a34a' },
+  badgeTextFail: { color: '#dc2626' },
+  examIdText: { fontSize: 10, fontWeight: '900', color: '#94a3b8', letterSpacing: 0.5 },
+  
+  // Card Text Layouts
+  examTitle: { fontSize: 17, fontWeight: '900', color: '#0f172a', lineHeight: 22 },
+  scoreSummaryText: { fontSize: 12, fontWeight: "700", color: "#64748b", marginTop: 4, marginBottom: 12 },
+  
+  // Custom Analytical Progress Rails
+  progressBarTrack: { height: 8, backgroundColor: "#f1f5f9", borderRadius: 99, overflow: "hidden" },
+  progressBarFill: { height: "100%", borderRadius: 99 },
+  fillSuccess: { backgroundColor: "#10b981" },
+  fillFail: { backgroundColor: "#ef4444" },
+  
+  // Lower Card Metric Footers
+  cardFooter: { 
+    marginTop: 16, 
+    paddingTop: 12, 
+    borderTopWidth: 1,
+    borderTopColor: '#f1f5f9',
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    alignItems: 'center'
   },
-  fillSuccess: {
-    backgroundColor: "#22c55e",
+  footerMetricWrapper: { flexDirection: 'column' },
+  metricLabel: { fontSize: 9, fontWeight: '900', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: 0.5 },
+  metricValueText: { fontSize: 13, fontWeight: '900', color: '#1e293b', marginTop: 1 },
+  purpleBoldText: { color: '#7e22ce', fontWeight: '900', fontSize: 13, marginTop: 1 },
+
+  // System Empty Container Panels
+  emptyCard: { backgroundColor: '#ffffff', borderRadius: 24, padding: 32, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#e2e8f0', marginTop: 24 },
+  emptyTextSub: { color: '#94a3b8', fontSize: 12, textAlign: 'center', fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5 },
+  
+  // Floating Action Chatbot Elements
+  fab: {
+    position: "absolute",
+    bottom: 24,
+    right: 24,
+    backgroundColor: "#7e22ce",
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    justifyContent: "center",
+    alignItems: "center",
+    elevation: 5,
+    shadowColor: "#0f172a",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
   },
-  fillFail: {
-    backgroundColor: "#ef4444",
-  },
-  cardFooter: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 10,
-  },
-  achievedText: {
-    fontSize: 10,
-    fontWeight: "900",
-    color: "#94a3b8",
-  },
-  requiredText: {
-    fontSize: 10,
-    fontWeight: "900",
-    color: "#6366f1",
-    textTransform: "uppercase",
-    fontStyle: "italic",
-  },
+  fabIcon: { fontSize: 24, color: "#ffffff" },
 });

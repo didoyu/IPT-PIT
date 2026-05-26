@@ -156,17 +156,17 @@ export default function AddQuestion() {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#4f46e5" />
+        <ActivityIndicator size="large" color="#7e22ce" />
       </View>
     );
   }
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <Text style={styles.title}>Manage Questions</Text>
+      <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+        <Text style={styles.title}>Manage Exam Questions</Text>
         <Text style={styles.subtitle}>
-          Exam: <Text style={styles.examHighlight}>{examTitle}</Text>
+          Exam Configuration: <Text style={styles.examHighlight}>{examTitle}</Text>
         </Text>
 
         {/* FORM CONTAINER */}
@@ -177,19 +177,20 @@ export default function AddQuestion() {
           ]}
         >
           <Text style={styles.formHeader}>
-            {editingId ? "📝 Edit Question" : "➕ Add Question"}
+            {editingId ? "Edit Question Formulation" : "Create New Question"}
           </Text>
 
           <TextInput
             style={styles.textArea}
             multiline
-            numberOfLines={4}
-            placeholder="Enter question text..."
+            numberOfLines={3}
+            placeholder="Enter question wording clearly..."
             placeholderTextColor="#94a3b8"
             value={newQuestion.text}
             onChangeText={(val) => setNewQuestion({ ...newQuestion, text: val })}
           />
 
+          <Text style={styles.label}>Evaluation Mechanics Type</Text>
           {/* TYPE TOGGLE ROUTE ROWS */}
           <View style={styles.typeToggleRow}>
             <TouchableOpacity
@@ -205,7 +206,7 @@ export default function AddQuestion() {
                   newQuestion.question_type === "MCQ" && styles.activeTypeTabText,
                 ]}
               >
-                Multiple Choice
+                Multiple Choice (MCQ)
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -221,7 +222,7 @@ export default function AddQuestion() {
                   newQuestion.question_type === "ESSAY" && styles.activeTypeTabText,
                 ]}
               >
-                Essay
+                Analytical Essay
               </Text>
             </TouchableOpacity>
           </View>
@@ -246,7 +247,7 @@ export default function AddQuestion() {
                   </TouchableOpacity>
                   <TextInput
                     style={styles.optionInput}
-                    placeholder={`Option ${i + 1}`}
+                    placeholder={`Option alternative ${i + 1}`}
                     placeholderTextColor="#94a3b8"
                     value={opt.text}
                     onChangeText={(val) => {
@@ -259,21 +260,24 @@ export default function AddQuestion() {
               ))}
             </View>
           ) : (
-            <TextInput
-              style={styles.input}
-              placeholder="Keywords for grading (e.g. Cisco, OSPF, VLAN)"
-              placeholderTextColor="#94a3b8"
-              value={newQuestion.required_keywords}
-              onChangeText={(val) =>
-                setNewQuestion({ ...newQuestion, required_keywords: val })
-              }
-            />
+            <View style={{ marginBottom: 16 }}>
+              <Text style={styles.label}>Automated Keyword Dictionary Matrix</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Required keywords string matching rules (e.g., OSPF, backbone)"
+                placeholderTextColor="#94a3b8"
+                value={newQuestion.required_keywords}
+                onChangeText={(val) =>
+                  setNewQuestion({ ...newQuestion, required_keywords: val })
+                }
+              />
+            </View>
           )}
 
           <View style={styles.actionRow}>
             <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
               <Text style={styles.submitButtonText}>
-                {editingId ? "UPDATE QUESTION" : "SAVE QUESTION"}
+                {editingId ? "UPDATE ENGINE CONFIGURATION" : "COMMIT TO QUESTION BANK"}
               </Text>
             </TouchableOpacity>
             {editingId && (
@@ -289,7 +293,7 @@ export default function AddQuestion() {
 
         {/* QUESTIONS LIST BANK */}
         <Text style={styles.sectionTitle}>
-          Questions in Bank ({questions.length})
+          Questions inside storage ledger ({questions.length})
         </Text>
         {questions.map((q, i) => (
           <View key={q.id || i} style={styles.questionCard}>
@@ -315,18 +319,20 @@ export default function AddQuestion() {
             </View>
           </View>
         ))}
+        {questions.length === 0 && (
+          <Text style={styles.emptyText}>No active configuration objects added yet.</Text>
+        )}
       </ScrollView>
 
       {/* CONFIRM DELETE MODAL OVERLAY */}
       <Modal visible={showDeleteModal} transparent animationType="fade">
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Delete Question?</Text>
+            <Text style={styles.modalTitle}>Purge Configuration?</Text>
             <Text style={styles.modalText}>
-              Are you sure you want to delete this question? This action cannot be
-              undone.
+              Are you certain you want to destroy this item sequence? This cascade cannot be recovered.
             </Text>
-            <div style={{ flexDirection: "row", gap: 12, justifyContent: "flex-end", width: "100%" }}>
+            <View style={styles.modalButtonsRow}>
               <TouchableOpacity
                 style={styles.modalCancel}
                 onPress={() => setShowDeleteModal(false)}
@@ -337,9 +343,9 @@ export default function AddQuestion() {
                 style={styles.modalConfirm}
                 onPress={handleDelete}
               >
-                <Text style={styles.modalConfirmText}>Delete</Text>
+                <Text style={styles.modalConfirmText}>Confirm Purge</Text>
               </TouchableOpacity>
-            </div>
+            </View>
           </View>
         </View>
       </Modal>
@@ -351,47 +357,50 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#f8fafc" },
   scrollContent: { padding: 24 },
   loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
-  title: { fontSize: 24, fontWeight: "900", color: "#0f172a", textTransform: "uppercase" },
+  title: { fontSize: 22, fontWeight: "900", color: "#0f172a", textTransform: "uppercase", letterSpacing: -0.5 },
   subtitle: { fontSize: 14, color: "#64748b", marginTop: 4, marginBottom: 24, fontWeight: "500" },
-  examHighlight: { color: "#4f46e5", textDecorationLine: "underline", fontWeight: "700" },
-  formCard: { padding: 20, borderRadius: 24, borderWidth: 2, marginBottom: 24 },
-  formCardNormal: { backgroundColor: "#ffffff", borderColor: "#e2e8f0" },
-  formCardEditing: { backgroundColor: "#f5f3ff", borderColor: "#4f46e5" },
-  formHeader: { fontSize: 16, fontWeight: "800", color: "#1e293b", marginBottom: 16 },
-  textArea: { backgroundColor: "#ffffff", padding: 14, borderRadius: 16, borderStyle: "solid", borderWidth: 1, borderColor: "#cbd5e1", fontSize: 15, textAlignVertical: "top", color: "#1e293b", marginBottom: 14, fontWeight: "500" },
-  typeToggleRow: { flexDirection: "row", backgroundColor: "#f1f5f9", padding: 4, borderRadius: 14, marginBottom: 14 },
+  examHighlight: { color: "#7e22ce", fontWeight: "700", backgroundColor: "#f3e8ff", paddingHorizontal: 6, borderRadius: 6 },
+  formCard: { padding: 20, borderRadius: 32, borderWidth: 1, marginBottom: 24 },
+  formCardNormal: { backgroundColor: "#ffffff", borderColor: "#f3e8ff" },
+  formCardEditing: { backgroundColor: "rgba(126, 34, 206, 0.02)", borderColor: "#7e22ce" },
+  formHeader: { fontSize: 14, fontWeight: "900", color: "#1e293b", marginBottom: 16, textTransform: "uppercase", letterSpacing: 0.5 },
+  textArea: { backgroundColor: "#ffffff", padding: 14, borderRadius: 16, borderWidth: 1, borderColor: "#e2e8f0", fontSize: 14, textAlignVertical: "top", color: "#1e293b", marginBottom: 14, fontWeight: "500", height: 90 },
+  label: { fontSize: 10, fontWeight: "900", color: "#94a3b8", textTransform: "uppercase", marginBottom: 8, letterSpacing: 0.5 },
+  typeToggleRow: { flexDirection: "row", backgroundColor: "#f1f5f9", padding: 4, borderRadius: 14, marginBottom: 16 },
   typeTab: { flex: 1, paddingVertical: 10, alignItems: "center", borderRadius: 10 },
   activeTypeTab: { backgroundColor: "#ffffff", elevation: 2, shadowColor: "#000", shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.1, shadowRadius: 2 },
-  typeTabText: { fontSize: 13, fontWeight: "700", color: "#64748b" },
-  activeTypeTabText: { color: "#4f46e5" },
+  typeTabText: { fontSize: 12, fontWeight: "700", color: "#64748b" },
+  activeTypeTabText: { color: "#7e22ce", fontWeight: "800" },
   optionsGrid: { gap: 10, marginBottom: 16 },
   optionRow: { flexDirection: "row", alignItems: "center", backgroundColor: "#ffffff", padding: 12, borderWidth: 1, borderColor: "#e2e8f0", borderRadius: 16, gap: 12 },
   checkbox: { width: 20, height: 20, borderWidth: 2, borderColor: "#cbd5e1", borderRadius: 6, justifyContent: "center", alignItems: "center" },
-  checkboxChecked: { borderColor: "#4f46e5", backgroundColor: "#4f46e5" },
+  checkboxChecked: { borderColor: "#7e22ce", backgroundColor: "#7e22ce" },
   checkboxInner: { width: 8, height: 8, backgroundColor: "#ffffff", borderRadius: 2 },
   optionInput: { flex: 1, fontSize: 14, fontWeight: "700", color: "#1e293b" },
-  input: { backgroundColor: "#ffffff", padding: 14, borderStyle: "solid", borderWidth: 1, borderColor: "#cbd5e1", borderRadius: 16, fontSize: 14, color: "#1e293b", marginBottom: 16 },
+  input: { backgroundColor: "#ffffff", padding: 14, borderWidth: 1, borderColor: "#cbd5e1", borderRadius: 16, fontSize: 14, color: "#1e293b" },
   actionRow: { flexDirection: "row", gap: 12 },
-  submitButton: { flex: 1, backgroundColor: "#4f46e5", paddingVertical: 14, borderRadius: 16, alignItems: "center" },
-  submitButtonText: { color: "#ffffff", fontWeight: "900", fontSize: 14, letterSpacing: 0.5 },
+  submitButton: { flex: 1, backgroundColor: "#7e22ce", paddingVertical: 14, borderRadius: 16, alignItems: "center" },
+  submitButtonText: { color: "#ffffff", fontWeight: "900", fontSize: 12, letterSpacing: 0.5 },
   cancelButton: { backgroundColor: "#e2e8f0", paddingHorizontal: 20, paddingVertical: 14, borderRadius: 16, justifyContent: "center" },
-  cancelButtonText: { color: "#475569", fontWeight: "700", fontSize: 13 },
-  sectionTitle: { fontSize: 11, fontWeight: "900", color: "#94a3b8", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 14 },
+  cancelButtonText: { color: "#475569", fontWeight: "700", fontSize: 12 },
+  sectionTitle: { fontSize: 11, fontWeight: "900", color: "#7e22ce", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 14 },
   questionCard: { backgroundColor: "#ffffff", padding: 16, borderRadius: 20, borderWidth: 1, borderColor: "#f1f5f9", marginBottom: 12, flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   questionDetails: { flex: 1, paddingRight: 12 },
-  badgeText: { fontSize: 9, fontWeight: "900", color: "#4f46e5", textTransform: "uppercase", marginBottom: 4, letterSpacing: 0.5 },
-  questionText: { fontSize: 15, fontWeight: "700", color: "#1e293b", lineHeight: 22 },
+  badgeText: { fontSize: 9, fontWeight: "900", color: "#7e22ce", textTransform: "uppercase", marginBottom: 4, letterSpacing: 0.5 },
+  questionText: { fontSize: 14, fontWeight: "700", color: "#1e293b", lineHeight: 20 },
   rowActions: { flexDirection: "row", gap: 8 },
   inlineEditBtn: { backgroundColor: "#f5f3ff", paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8 },
-  inlineEditBtnText: { color: "#4f46e5", fontSize: 12, fontWeight: "800" },
+  inlineEditBtnText: { color: "#7e22ce", fontSize: 12, fontWeight: "800" },
   inlineDeleteBtn: { backgroundColor: "#fef2f2", paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8 },
   inlineDeleteBtnText: { color: "#ef4444", fontSize: 12, fontWeight: "800" },
-  modalOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.4)", justifyContent: "center", alignItems: "center", padding: 24 },
-  modalContent: { backgroundColor: "#ffffff", padding: 24, borderRadius: 24, width: "100%", maxWidth: 340, alignItems: "flex-start" },
-  modalTitle: { fontSize: 18, fontWeight: "800", color: "#0f172a", marginBottom: 8 },
-  modalText: { fontSize: 14, color: "#64748b", lineHeight: 20, marginBottom: 24 },
+  emptyText: { textAlign: "center", color: "#94a3b8", fontSize: 14, fontStyle: "italic", paddingVertical: 24, borderWidth: 1, borderStyle: "dashed", borderColor: "#cbd5e1", borderRadius: 16, backgroundColor: "#ffffff", padding: 24 },
+  modalOverlay: { flex: 1, backgroundColor: "rgba(15, 23, 42, 0.4)", justifyContent: "center", alignItems: "center", padding: 24 },
+  modalContent: { backgroundColor: "#ffffff", padding: 24, borderRadius: 24, width: "100%", maxWidth: 340, alignItems: "flex-start", borderWidth: 1, borderColor: "#f3e8ff" },
+  modalTitle: { fontSize: 18, fontWeight: "900", color: "#0f172a", marginBottom: 8, textTransform: "uppercase", letterSpacing: -0.5 },
+  modalText: { fontSize: 14, color: "#64748b", lineHeight: 20, marginBottom: 24, fontWeight: "500" },
+  modalButtonsRow: { flexDirection: "row", gap: 12, justifyContent: "flex-end", width: "100%" },
   modalCancel: { paddingVertical: 10, paddingHorizontal: 16, borderRadius: 12, backgroundColor: "#f1f5f9" },
-  modalCancelText: { color: "#475569", fontWeight: "700" },
+  modalCancelText: { color: "#475569", fontWeight: "700", fontSize: 13 },
   modalConfirm: { paddingVertical: 10, paddingHorizontal: 16, borderRadius: 12, backgroundColor: "#ef4444" },
-  modalConfirmText: { color: "#ffffff", fontWeight: "700" },
+  modalConfirmText: { color: "#ffffff", fontWeight: "700", fontSize: 13 },
 });

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
+import { HelpCircle, Trash2, Edit2, CornerDownRight } from 'lucide-react';
 
 export default function AddQuestion() {
   const { examId } = useParams();
@@ -17,7 +18,6 @@ export default function AddQuestion() {
     ]
   });
 
-  // Modal state
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteQuestionId, setDeleteQuestionId] = useState(null);
 
@@ -73,7 +73,6 @@ export default function AddQuestion() {
     });
   };
 
-  // Open modal instead of direct delete
   const confirmDelete = (qId) => {
     setDeleteQuestionId(qId);
     setShowDeleteModal(true);
@@ -85,38 +84,53 @@ export default function AddQuestion() {
       setShowDeleteModal(false);
       setDeleteQuestionId(null);
       fetchExamData();
-    } catch (err) {
-      alert("Failed to delete question.");
-    }
+    } catch (err) { alert("Failed to delete question."); }
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <h1 className="text-2xl font-black text-slate-800 mb-2 uppercase">Manage Exam Questions</h1>
-      <p className="text-slate-500 mb-8 font-medium">Exam: <span className="text-indigo-600 underline">{examTitle}</span></p>
+    <div className="max-w-4xl mx-auto p-6 space-y-8">
+      <div>
+        <h1 className="text-2xl font-black text-slate-900 mb-1 uppercase tracking-tight">Manage Exam Questions</h1>
+        <p className="text-slate-500 font-medium text-sm flex items-center gap-1.5">
+          Exam Configuration: <span className="text-purple-700 font-bold bg-purple-50 px-2.5 py-0.5 rounded-lg border border-purple-100">{examTitle}</span>
+        </p>
+      </div>
 
-      {/* FORM */}
-      <div className={`p-6 rounded-2xl border-2 mb-10 transition-all ${editingId ? 'border-indigo-500 bg-indigo-50/30' : 'bg-white border-slate-200 shadow-sm'}`}>
-        <h2 className="font-bold text-lg mb-4">{editingId ? '📝 Edit Question' : '➕ Add Question'}</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
+      {/* COMPONENT FORM WORKSPACE */}
+      <div className={`p-6 rounded-3xl border transition-all duration-300 ${editingId ? 'border-purple-500 bg-gradient-to-br from-purple-50/40 via-white to-purple-50/10 shadow-lg shadow-purple-100/50' : 'bg-white border-purple-100/60 shadow-sm'}`}>
+        <h2 className="font-black text-slate-800 text-sm uppercase tracking-wider mb-4 flex items-center gap-2">
+          {editingId ? <Edit2 size={16} className="text-purple-600" /> : <HelpCircle size={18} className="text-purple-600" />}
+          {editingId ? 'Edit Question Formulation' : 'Create New Question'}
+        </h2>
+        
+        <form onSubmit={handleSubmit} className="space-y-5">
           <textarea 
-            className="w-full p-4 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none font-medium" 
-            placeholder="Enter question text..." 
+            className="w-full p-4 border border-slate-200 rounded-2xl focus:border-purple-500 focus:ring-4 focus:ring-purple-100 outline-none font-medium transition-all resize-none text-slate-800" 
+            rows="3"
+            placeholder="Enter question wording clearly..." 
             value={newQuestion.text}
             onChange={(e) => setNewQuestion({...newQuestion, text: e.target.value})} required
           />
           
-          <select className="w-full p-3 border rounded-xl font-bold text-slate-600" value={newQuestion.question_type} onChange={(e) => setNewQuestion({...newQuestion, question_type: e.target.value})}>
-            <option value="MCQ">Multiple Choice (Checkboxes)</option>
-            <option value="ESSAY">Essay</option>
-          </select>
+          <div className="w-full">
+            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">Evaluation Mechanics Type</label>
+            <select 
+              className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-700 outline-none focus:border-purple-400 focus:bg-white transition-all cursor-pointer text-sm" 
+              value={newQuestion.question_type} 
+              onChange={(e) => setNewQuestion({...newQuestion, question_type: e.target.value})}
+            >
+              <option value="MCQ">Multiple Choice Questionnaire (MCQ)</option>
+              <option value="ESSAY">Analytical Essay Response</option>
+            </select>
+          </div>
 
           {newQuestion.question_type === 'MCQ' ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
               {newQuestion.options.map((opt, i) => (
-                <div key={i} className="flex items-center gap-3 bg-white p-3 border rounded-xl shadow-sm hover:border-indigo-200">
+                <div key={i} className="flex items-center gap-3 bg-white p-3.5 border border-slate-100 rounded-2xl shadow-inner-sm hover:border-purple-300 transition-all group">
                   <input 
                     type="checkbox"
+                    className="w-4 h-4 rounded border-slate-300 text-purple-700 focus:ring-purple-500 accent-purple-700 cursor-pointer"
                     checked={opt.is_correct} 
                     onChange={() => {
                       const updated = [...newQuestion.options];
@@ -124,7 +138,10 @@ export default function AddQuestion() {
                       setNewQuestion({...newQuestion, options: updated});
                     }} 
                   />
-                  <input className="flex-1 bg-transparent outline-none text-sm font-bold" placeholder={`Option ${i+1}`} value={opt.text}
+                  <input 
+                    className="flex-1 bg-transparent outline-none text-sm font-bold text-slate-800 placeholder-slate-400" 
+                    placeholder={`Option alternative ${i+1}`} 
+                    value={opt.text}
                     onChange={(e) => {
                       const updated = [...newQuestion.options]; updated[i].text = e.target.value;
                       setNewQuestion({...newQuestion, options: updated});
@@ -134,46 +151,83 @@ export default function AddQuestion() {
               ))}
             </div>
           ) : (
-            <input className="w-full p-4 border rounded-xl" placeholder="Keywords for grading (e.g. Cisco, OSPF, VLAN)" value={newQuestion.required_keywords}
-              onChange={(e) => setNewQuestion({...newQuestion, required_keywords: e.target.value})}
-            />
+            <div className="pt-1">
+              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">Automated Keyword Dictionary Matrix</label>
+              <input 
+                className="w-full p-4 border border-slate-200 rounded-2xl focus:border-purple-500 focus:ring-4 focus:ring-purple-100 outline-none text-sm font-medium transition-all" 
+                placeholder="Required keywords string matching rules (e.g., OSPF, backbone, area 0)" 
+                value={newQuestion.required_keywords}
+                onChange={(e) => setNewQuestion({...newQuestion, required_keywords: e.target.value})}
+              />
+            </div>
           )}
 
-          <div className="flex gap-3">
-            <button type="submit" className="flex-1 bg-indigo-600 text-white py-3 rounded-xl font-black hover:bg-indigo-700 transition">
-              {editingId ? 'UPDATE QUESTION' : 'SAVE QUESTION'}
+          <div className="flex gap-3 pt-2">
+            <button 
+              type="submit" 
+              className="flex-1 bg-purple-700 text-white py-3.5 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-purple-600 transition shadow-md shadow-purple-100 active:scale-[0.99]"
+            >
+              {editingId ? 'Update Engine Configuration' : 'Commit to Question Bank'}
             </button>
-            {editingId && <button type="button" onClick={handleCancelEdit} className="px-6 py-3 bg-slate-200 text-slate-600 rounded-xl font-bold">CANCEL</button>}
+            {editingId && (
+              <button 
+                type="button" 
+                onClick={handleCancelEdit} 
+                className="px-6 py-3.5 bg-slate-100 text-slate-600 rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-slate-200 transition"
+              >
+                Cancel
+              </button>
+            )}
           </div>
         </form>
       </div>
 
-      {/* LIST */}
+      {/* DATA STRUCT BANK VIEW */}
       <div className="space-y-4">
-        <h2 className="font-black text-slate-400 uppercase text-xs tracking-widest">Questions in Bank ({questions.length})</h2>
-        {questions.map((q, i) => (
-          <div key={q.id} className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex justify-between items-center group">
-            <div className="flex-1">
-              <span className="text-[10px] font-black text-indigo-400 uppercase mb-1 block">{q.question_type}</span>
-              <p className="font-bold text-slate-800">{i+1}. {q.text}</p>
+        <h2 className="font-black text-purple-400 uppercase text-xs tracking-widest flex items-center gap-2">
+          <CornerDownRight size={14} /> Questions inside storage ledger ({questions.length})
+        </h2>
+        
+        <div className="space-y-3">
+          {questions.map((q, i) => (
+            <div key={q.id} className="bg-gradient-to-br from-white to-purple-50/20 p-5 rounded-2xl border border-purple-100/50 shadow-sm flex justify-between items-center group hover:border-purple-300 hover:shadow-md transition-all duration-200">
+              <div className="flex-1 pr-4">
+                <span className="text-[9px] font-black bg-purple-100/60 text-purple-700 border border-purple-200/40 px-2 py-0.5 rounded-md uppercase mb-2 inline-block tracking-wider">
+                  {q.question_type}
+                </span>
+                <p className="font-bold text-slate-800 text-sm leading-relaxed">{i+1}. {q.text}</p>
+              </div>
+              <div className="flex gap-2 opacity-90 group-hover:opacity-100 transition-opacity">
+                <button 
+                  onClick={() => handleEditClick(q)} 
+                  className="px-3.5 py-2 bg-purple-50 text-purple-700 rounded-xl text-xs font-black border border-purple-100/40 hover:bg-purple-100 transition-colors"
+                >
+                  Edit
+                </button>
+                <button 
+                  onClick={() => confirmDelete(q.id)} 
+                  className="px-3.5 py-2 bg-red-50 text-red-500 rounded-xl text-xs font-black border border-red-100/40 hover:bg-red-100 transition-colors"
+                >
+                  Delete
+                </button>
+              </div>
             </div>
-            <div className="flex gap-2">
-              <button onClick={() => handleEditClick(q)} className="px-4 py-2 bg-indigo-50 text-indigo-600 rounded-lg text-xs font-black hover:bg-indigo-100">Edit</button>
-              <button onClick={() => confirmDelete(q.id)} className="px-4 py-2 bg-red-50 text-red-500 rounded-lg text-xs font-black hover:bg-red-100">Delete</button>
-            </div>
-          </div>
-        ))}
+          ))}
+          {questions.length === 0 && (
+            <p className="text-center text-slate-400 text-sm italic py-6 border border-dashed border-slate-200 rounded-2xl bg-white">No active configuration objects added yet.</p>
+          )}
+        </div>
       </div>
 
-      {/* DELETE MODAL */}
+      {/* CORE MODAL ACCENT ALIGNMENT */}
       {showDeleteModal && (
-        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-lg">
-            <h3 className="text-lg font-bold text-slate-800 mb-4">Delete Question?</h3>
-            <p className="text-slate-500 text-sm mb-6">Are you sure you want to delete this question? This action cannot be undone.</p>
+        <div className="fixed inset-0 bg-purple-950/40 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white rounded-3xl p-7 max-w-sm w-full shadow-2xl border border-purple-100 animate-in fade-in zoom-in-95 duration-150">
+            <h3 className="text-lg font-black text-slate-900 uppercase tracking-tight mb-2">Purge Configuration?</h3>
+            <p className="text-slate-500 text-sm mb-6 leading-relaxed">Are you certain you want to destroy this item sequence? This cascade cannot be recovered.</p>
             <div className="flex justify-end gap-3">
-              <button onClick={() => setShowDeleteModal(false)} className="px-4 py-2 rounded-xl bg-slate-200 text-slate-600 font-bold hover:bg-slate-300">Cancel</button>
-              <button onClick={handleDelete} className="px-4 py-2 rounded-xl bg-red-500 text-white font-bold hover:bg-red-600">Delete</button>
+              <button onClick={() => setShowDeleteModal(false)} className="px-4 py-2 rounded-xl bg-slate-100 text-slate-600 font-bold hover:bg-slate-200 text-sm transition-colors">Cancel</button>
+              <button onClick={handleDelete} className="px-5 py-2 rounded-xl bg-red-500 text-white font-bold hover:bg-red-600 text-sm shadow-sm shadow-red-100 transition-colors">Confirm Purge</button>
             </div>
           </div>
         </div>

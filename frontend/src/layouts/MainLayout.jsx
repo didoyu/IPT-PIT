@@ -1,10 +1,11 @@
 import { Outlet, Link, useNavigate, useLocation } from "react-router-dom";
+import Chatbot from "../components/Chatbot"; 
 
 export default function MainLayout() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const username = localStorage.getItem('user');
+  const username = localStorage.getItem('user') || 'Student';
   const isStaff = localStorage.getItem('isStaff') === 'true';
 
   const handleLogout = () => {
@@ -12,34 +13,34 @@ export default function MainLayout() {
     navigate('/');
   };
 
-  // Highlight active link
   const isActive = (path) => location.pathname === path;
 
   return (
     <div className="min-h-screen bg-slate-50">
 
-      {/* NAVBAR / HEADER */}
-      <nav className="bg-white border-b border-slate-200 px-6 py-4 flex justify-between items-center sticky top-0 z-50 shadow-sm">
+      {/* 🔮 NAVBAR / HEADER */}
+      {/* Changed to bg-purple-950 to match the login base, paired with a subtle deep border */}
+      <nav className="bg-purple-950 border-b border-purple-900 px-6 py-4 flex justify-between items-center sticky top-0 z-50 shadow-md text-white">
 
-        {/* LEFT SIDE */}
+        {/* LEFT SIDE: BRANDING & NAVIGATION LINKS */}
         <div className="flex items-center gap-8">
           <Link
             to={isStaff ? "/admin" : "/exams"}
-            className="text-xl font-black text-indigo-600 tracking-tight"
+            className="text-xl font-black text-white tracking-tight"
           >
-            EXAM<span className="text-slate-900">SYS</span>
+            EXAM<span className="text-purple-400">SYS</span>
           </Link>
 
-          {/* NAV LINKS */}
-          <div className="hidden md:flex gap-6 text-sm font-semibold text-slate-600">
+          {/* NAV LINKS WITH ADJUSTED CONTRAST */}
+          <div className="hidden md:flex gap-6 text-sm font-semibold text-purple-200/80">
             {isStaff ? (
               <>
                 <Link
                   to="/admin"
-                  className={`transition ${
+                  className={`transition-colors py-1 ${
                     isActive("/admin")
-                      ? "text-indigo-600 border-b-2 border-indigo-600"
-                      : "hover:text-indigo-600"
+                      ? "text-white border-b-2 border-white"
+                      : "hover:text-white"
                   }`}
                 >
                   Management
@@ -47,10 +48,10 @@ export default function MainLayout() {
 
                 <Link
                   to="/admin/create-exam"
-                  className={`transition ${
+                  className={`transition-colors py-1 ${
                     isActive("/admin/create-exam")
-                      ? "text-indigo-600 border-b-2 border-indigo-600"
-                      : "hover:text-indigo-600"
+                      ? "text-white border-b-2 border-white"
+                      : "hover:text-white"
                   }`}
                 >
                   Create Exam
@@ -60,10 +61,10 @@ export default function MainLayout() {
               <>
                 <Link
                   to="/exams"
-                  className={`transition ${
+                  className={`transition-colors py-1 ${
                     isActive("/exams")
-                      ? "text-indigo-600 border-b-2 border-indigo-600"
-                      : "hover:text-indigo-600"
+                      ? "text-white border-b-2 border-white"
+                      : "hover:text-white"
                   }`}
                 >
                   Available Exams
@@ -71,10 +72,10 @@ export default function MainLayout() {
 
                 <Link
                   to="/dashboard"
-                  className={`transition ${
+                  className={`transition-colors py-1 ${
                     isActive("/dashboard")
-                      ? "text-indigo-600 border-b-2 border-indigo-600"
-                      : "hover:text-indigo-600"
+                      ? "text-white border-b-2 border-white"
+                      : "hover:text-white"
                   }`}
                 >
                   My Results
@@ -84,41 +85,44 @@ export default function MainLayout() {
           </div>
         </div>
 
-        {/* RIGHT SIDE */}
+        {/* RIGHT SIDE: USER PROFILE & CONTROLS */}
         <div className="flex items-center gap-4">
 
-          {/* USER INFO */}
+          {/* USER DISPLAY */}
           <div className="text-right hidden sm:block">
-            <p className="text-xs text-slate-400 font-bold uppercase">
+            <p className="text-[10px] text-purple-400 font-bold uppercase tracking-wider">
               Logged in as
             </p>
-            <p className="text-sm font-bold text-slate-900">
+            <p className="text-sm font-bold text-white">
               {username}
             </p>
           </div>
 
-          {/* ✅ PROFILE BUTTON */}
+          {/* PROFILE ACTION BUTTON */}
           <button
             onClick={() => navigate('/profile')}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors"
+            className="bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-xl text-sm font-bold transition-colors shadow-sm active:scale-[0.98]"
           >
             Profile
           </button>
 
-          {/* LOGOUT */}
+          {/* LOGOUT BUTTON - Styled beautifully for dark backgrounds */}
           <button
             onClick={handleLogout}
-            className="bg-slate-100 hover:bg-red-50 hover:text-red-600 text-slate-600 px-4 py-2 rounded-lg text-sm font-bold transition-colors"
+            className="bg-purple-900/60 hover:bg-red-600 text-purple-200 hover:text-white px-4 py-2 rounded-xl text-sm font-bold transition-all border border-purple-800/80 active:scale-[0.98]"
           >
             Logout
           </button>
         </div>
       </nav>
 
-      {/* PAGE CONTENT */}
+      {/* MAIN CONTENT AREA */}
       <main className="py-8">
         <Outlet />
       </main>
+
+      {/* Floating Global Chatbot Widget */}
+      <Chatbot />
     </div>
   );
 }

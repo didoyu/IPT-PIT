@@ -1,3 +1,4 @@
+import requests
 from rest_framework import viewsets, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -224,13 +225,18 @@ def admin_results_list(request):
         return Response(status=403)
 
     results = ExamResult.objects.select_related('user__profile', 'exam')
-
     data = []
 
     for r in results:
         profile = getattr(r.user, 'profile', None)
-
         total_questions = r.exam.questions.count() if r.exam else 0
+        
+        # 🎯 Dynamic data evaluations
+        pass_mark = r.exam.pass_mark if r.exam else 50
+        percentage = (r.score / total_questions * 100) if total_questions > 0 else 0
+        
+        # Using model property or running the comparison inline
+        is_passed = getattr(r, 'is_passed', percentage >= pass_mark)
 
         data.append({
             "id": r.id,
@@ -238,9 +244,10 @@ def admin_results_list(request):
             "exam_title": r.exam.title if r.exam else "N/A",
             "score": r.score,
             "total_questions": total_questions,
+            "percentage": round(percentage, 2),
+            "pass_mark": pass_mark,
+            "passed": is_passed,  # Sent to map to mobile 'item.passed'
             "date": r.completed_at.strftime("%b %d, %Y %H:%M"),
-
-            # cleaned values (no None / N/A)
             "section": profile.section.strip() if profile and profile.section else "",
             "school_year": profile.school_year.strip() if profile and profile.school_year else "",
         })
@@ -307,3 +314,31 @@ def user_profile(request):
         "birthday": profile.birthday,
         "profile_picture": pic_url,
     })
+
+@api_view(['POST'])
+@permission_classes([AllowAny]) # Changing to AllowAny for testing, change to IsAuthenticated later if needed
+def chat_with_ollama(request):
+    """Bridge view that sends prompt payload over to local Ollama runtime server instance."""
+    user_message = request.data.get('message', '')
+    
+    if not user_message:
+        return Response({'error': 'Message details cannot be empty'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    ollama_url = "http://127.0.0.1:11434/api/generate"
+    payload = {
+        "model": "qwen2.5:0.5b",
+        "prompt": user_message,
+        "stream": False  
+    }
+    
+    try:
+        response = requests.post(ollama_url, json=payload, timeout=30)
+        
+        if response.status_code == 200:
+            ollama_reply = response.json().get('response', '')
+            return Response({'reply': ollama_reply}, status=status.HTTP_200_OK)
+        else:
+            return Response({'reply': 'Ollama runtime engine responded with an error.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
+    except requests.exceptions.ConnectionError:
+        return Response({'reply': 'Could not communicate with background Ollama service engine.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

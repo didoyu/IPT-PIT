@@ -62,7 +62,7 @@ export default function CreateExam() {
           <Text style={styles.title}>Setup New Exam</Text>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Exam Title</Text>
+            <Text style={styles.label}>Exam Title Parameter</Text>
             <TextInput
               style={styles.input}
               placeholder="e.g., CCNA: Subnetting Basics"
@@ -73,12 +73,12 @@ export default function CreateExam() {
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Instructions</Text>
+            <Text style={styles.label}>Academic Instructions & Manifesto</Text>
             <TextInput
               style={styles.textArea}
               multiline
               numberOfLines={4}
-              placeholder="Describe what the student needs to know..."
+              placeholder="Describe what rules, bounds, and references the system user or student needs to fully map out..."
               placeholderTextColor="#94a3b8"
               value={description}
               onChangeText={setDescription}
@@ -87,7 +87,7 @@ export default function CreateExam() {
 
           <View style={styles.thresholdContainer}>
             <View style={styles.thresholdHeader}>
-              <Text style={styles.thresholdLabel}>Passing Threshold</Text>
+              <Text style={styles.thresholdLabel}>Passing Evaluation Threshold</Text>
               <View style={styles.badge}>
                 <Text style={styles.badgeText}>{passMark}%</Text>
               </View>
@@ -108,12 +108,12 @@ export default function CreateExam() {
             </View>
 
             <Text style={styles.hintText}>
-              Students must reach this percentage to be marked as "PASSED."
+              Candidate instances must hit this specific processing ceiling value to generate a verified "PASSED" response marker flag.
             </Text>
           </View>
 
           <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-            <Text style={styles.submitButtonText}>CREATE & CONTINUE</Text>
+            <Text style={styles.submitButtonText}>CREATE ENGINE INSTANCE & CONTINUE</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -124,23 +124,23 @@ export default function CreateExam() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#f8fafc" },
   scrollContent: { padding: 24 },
-  card: { backgroundColor: "#ffffff", padding: 24, borderRadius: 32, borderWidth: 1, borderColor: "#e2e8f0", elevation: 2, shadowColor: "#0f172a", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.03, shadowRadius: 12 },
+  card: { backgroundColor: "#ffffff", padding: 24, borderRadius: 32, borderWidth: 1, borderColor: "#f3e8ff", elevation: 2, shadowColor: "#0f172a", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.03, shadowRadius: 12 },
   title: { fontSize: 22, fontWeight: "900", color: "#0f172a", textTransform: "uppercase", letterSpacing: -0.5, marginBottom: 24 },
   inputGroup: { marginBottom: 20 },
-  label: { fontSize: 11, fontWeight: "900", color: "#94a3b8", textTransform: "uppercase", marginBottom: 8, letterSpacing: 0.5 },
-  input: { backgroundColor: "#ffffff", padding: 14, borderWidth: 1, borderColor: "#cbd5e1", borderRadius: 16, fontSize: 15, color: "#1e293b", fontWeight: "500" },
-  textArea: { backgroundColor: "#ffffff", padding: 14, borderWidth: 1, borderColor: "#cbd5e1", borderRadius: 16, fontSize: 15, color: "#1e293b", height: 120, textAlignVertical: "top", fontWeight: "500" },
-  thresholdContainer: { backgroundColor: "#f8fafc", padding: 18, borderRadius: 20, borderWidth: 1, borderColor: "#e2e8f0", marginBottom: 28 },
+  label: { fontSize: 10, fontWeight: "900", color: "#94a3b8", textTransform: "uppercase", marginBottom: 8, letterSpacing: 0.5 },
+  input: { backgroundColor: "#ffffff", padding: 14, borderWidth: 1, borderColor: "#e2e8f0", borderRadius: 16, fontSize: 14, color: "#1e293b", fontWeight: "500" },
+  textArea: { backgroundColor: "#ffffff", padding: 14, borderWidth: 1, borderColor: "#e2e8f0", borderRadius: 16, fontSize: 14, color: "#1e293b", height: 120, textAlignVertical: "top", fontWeight: "500" },
+  thresholdContainer: { backgroundColor: "rgba(126, 34, 206, 0.02)", padding: 18, borderRadius: 20, borderWidth: 1, borderColor: "rgba(126, 34, 206, 0.05)", marginBottom: 28 },
   thresholdHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 16 },
-  thresholdLabel: { fontSize: 12, fontWeight: "800", color: "#475569", textTransform: "uppercase" },
-  badge: { backgroundColor: "#4f46e5", paddingHorizontal: 12, paddingVertical: 4, borderRadius: 99 },
-  badgeText: { color: "#ffffff", fontWeight: "900", fontSize: 13 },
+  thresholdLabel: { fontSize: 11, fontWeight: "900", color: "#475569", textTransform: "uppercase", letterSpacing: 0.5 },
+  badge: { backgroundColor: "#7e22ce", paddingHorizontal: 12, paddingVertical: 4, borderRadius: 99 },
+  badgeText: { color: "#ffffff", fontWeight: "900", fontSize: 12, letterSpacing: 0.5 },
   stepperRow: { flexDirection: "row", alignItems: "center", gap: 12 },
   stepButton: { width: 40, height: 40, backgroundColor: "#ffffff", borderRadius: 12, borderWidth: 1, borderColor: "#cbd5e1", justifyContent: "center", alignItems: "center", elevation: 1 },
-  stepButtonText: { fontSize: 20, fontWeight: "600", color: "#475569", marginTop: -2 },
-  trackContainer: { flex: 1, height: 8, backgroundColor: "#e2e8f0", borderRadius: 99, overflow: "hidden" },
-  trackFill: { height: "100%", backgroundColor: "#4f46e5", borderRadius: 99 },
-  hintText: { fontSize: 10, color: "#94a3b8", fontStyle: "italic", marginTop: 12 },
-  submitButton: { backgroundColor: "#4f46e5", paddingVertical: 16, borderRadius: 16, alignItems: "center", shadowColor: "#4f46e5", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 8 },
-  submitButtonText: { color: "#ffffff", fontWeight: "900", fontSize: 15, letterSpacing: 1 },
+  stepButtonText: { fontSize: 20, fontWeight: "600", color: "#7e22ce", marginTop: -2 },
+  trackContainer: { flex: 1, height: 6, backgroundColor: "#e2e8f0", borderRadius: 99, overflow: "hidden" },
+  trackFill: { height: "100%", backgroundColor: "#7e22ce", borderRadius: 99 },
+  hintText: { fontSize: 10, color: "#94a3b8", fontStyle: "italic", marginTop: 12, fontWeight: "500" },
+  submitButton: { backgroundColor: "#7e22ce", paddingVertical: 16, borderRadius: 16, alignItems: "center", shadowColor: "#7e22ce", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 8 },
+  submitButtonText: { color: "#ffffff", fontWeight: "900", fontSize: 13, letterSpacing: 1 },
 });

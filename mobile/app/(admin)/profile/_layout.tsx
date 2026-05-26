@@ -4,14 +4,16 @@ export default function ProfileNavigationLayout() {
   return (
     <Stack
       screenOptions={{
+        headerShown: false,
         headerStyle: {
-          backgroundColor: "#ffffff",
+          backgroundColor: "#ffffff", // Keeps the background clean and bright above your forms
         },
-        headerTintColor: "#0f172a",
+        // 💜 BRAND SYNC: Changed from dark slate (#0f172a) to your active Deep Purple accent
+        headerTintColor: "#7e22ce", 
         headerTitleStyle: {
-          fontWeight: "800",
+          fontWeight: "900", // Pushed to extra bold to stay consistent with your layout headers
         },
-        headerShadowVisible: false, // Clean look without harsh borders
+        headerShadowVisible: false, 
       }}
     >
       {/* The main hub doesn't need a top header since we styled a beautiful custom one */}
@@ -20,7 +22,7 @@ export default function ProfileNavigationLayout() {
         options={{ headerShown: false }} 
       />
       
-      {/* The sub-details screen will automatically show a native back arrow to return to index */}
+      {/* The sub-details screen will automatically show a matching purple back arrow */}
       <Stack.Screen 
         name="details" 
         options={{ title: "Account Details" }} 

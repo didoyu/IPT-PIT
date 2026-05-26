@@ -17,13 +17,11 @@ export default function AdminLayout() {
         const isStaff = await AsyncStorage.getItem("isStaff");
         const storedUser = await AsyncStorage.getItem("user");
 
-        // 1. If no auth token, redirect to login
         if (!token) {
           router.replace("/login");
           return;
         }
 
-        // 2. If user is a student, deny access and kick to student side
         if (isStaff !== "true") {
           Alert.alert("Unauthorized", "Access denied. Student accounts cannot view administrator panels.");
           router.replace("/(student)/studentdashboard");
@@ -43,17 +41,15 @@ export default function AdminLayout() {
     checkAdminAuth();
   }, []);
 
-  // 🚪 LOGOUT METHOD
   const handleLogout = async () => {
     await AsyncStorage.clear();
     router.replace("/login");
   };
 
-  // Prevent flash rendering during validation check
   if (checkingAuth) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#4f46e5" />
+        <ActivityIndicator size="large" color="#7e22ce" />
       </View>
     );
   }
@@ -61,14 +57,14 @@ export default function AdminLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: "#4f46e5",
+        tabBarActiveTintColor: "#7e22ce", // Deep purple interactive focus indicator
         tabBarInactiveTintColor: "#64748b",
         tabBarStyle: styles.tabBar,
         headerStyle: styles.globalHeader,
         headerShadowVisible: false,
-        headerTitle: "", // Clears default text to prevent title overlapping
+        headerTitle: "", 
         
-        // LEFT SIDE: Brand Logo + Web-style Admin Pill Badge
+        // LEFT SIDE: Synchronized Web Branding (White + Purple-400 Split)
         headerLeft: () => (
           <View style={styles.logoContainer}>
             <View style={styles.logoTextGroup}>
@@ -81,17 +77,8 @@ export default function AdminLayout() {
           </View>
         ),
 
-        // RIGHT SIDE: Welcome statement + Red Logout action container
-        headerRight: () => (
-          <View style={styles.headerRightContainer}>
-            <Text style={styles.welcomeText}>
-              Welcome, <Text style={styles.usernameBold}>{username}</Text>
-            </Text>
-            <TouchableOpacity onPress={handleLogout} activeOpacity={0.7} style={styles.logoutIconButton}>
-              <FontAwesome name="sign-out" size={16} color="#ef4444" />
-            </TouchableOpacity>
-          </View>
-        ),
+        // RIGHT SIDE: Clean Mobile-first action button container (Welcome string hidden for viewport spacing)
+        
       }}
     >
       <Tabs.Screen
@@ -138,15 +125,15 @@ export default function AdminLayout() {
 
 const styles = StyleSheet.create({
   globalHeader: {
-    backgroundColor: "#ffffff",
+    backgroundColor: "#2e1065", // Matches Tailwind's bg-purple-950 exactly
     borderBottomWidth: 1,
-    borderBottomColor: "#e2e8f0",
+    borderBottomColor: "#4c1d95", // Matches border-purple-900 depth
     height: 64,
   },
   logoContainer: {
     flexDirection: "row",
     alignItems: "center",
-    paddingLeft: 20,
+    paddingLeft: 16,
     gap: 8,
   },
   logoTextGroup: {
@@ -156,17 +143,17 @@ const styles = StyleSheet.create({
   logoMain: {
     fontSize: 18,
     fontWeight: "900",
-    color: "#4f46e5",
+    color: "#ffffff", // Pure white text match
     letterSpacing: -0.5,
   },
   logoSub: {
     fontSize: 18,
     fontWeight: "900",
-    color: "#0f172a",
+    color: "#c084fc", // Matches Tailwind's text-purple-400
     letterSpacing: -0.5,
   },
   adminBadge: {
-    backgroundColor: "#ef4444",
+    backgroundColor: "#ef4444", 
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 99,
@@ -180,32 +167,22 @@ const styles = StyleSheet.create({
   headerRightContainer: {
     flexDirection: "row",
     alignItems: "center",
-    paddingRight: 20,
-    gap: 12,
-  },
-  welcomeText: {
-    fontSize: 13,
-    color: "#64748b",
-    fontWeight: "500",
-  },
-  usernameBold: {
-    fontWeight: "800",
-    color: "#0f172a",
+    paddingRight: 16,
   },
   logoutIconButton: {
-    backgroundColor: "#fef2f2",
+    backgroundColor: "rgba(76, 29, 149, 0.4)", // Translucent deep purple background element matching web
     padding: 8,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: "#fee2e2",
+    borderColor: "rgba(139, 92, 246, 0.2)",
   },
   tabBar: {
     backgroundColor: "#ffffff",
     borderTopWidth: 1,
     borderTopColor: "#e2e8f0",
-    height: 64,
+    height: 60,
     paddingBottom: 8,
-    paddingTop: 8,
+    paddingTop: 4,
   },
   centered: {
     flex: 1,

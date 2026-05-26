@@ -14,6 +14,15 @@ export default function RootLayout() {
       <Stack.Screen name="register" />
       <Stack.Screen name="(admin)" />
       <Stack.Screen name="(student)" />
+      {/* 🦙 Register your chatbot route as a modal overlay over everything */}
+      <Stack.Screen 
+        name="chatbotmobile" 
+        options={{ 
+          headerShown: true, 
+          title: "Portal Assistant", 
+          presentation: "modal" // 👈 Makes it slide up smoothly from the bottom
+        }} 
+      />
     </Stack>
   );
 }
