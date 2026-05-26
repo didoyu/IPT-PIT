@@ -6,7 +6,7 @@ Identity Node Activation: Student Portal Terminal
 Welcome to the Terminal!
 
 Please activate your clearance node using the direct endpoint sequence below to authorize active testing environments:
-{{ frontend_activation_url }}
+{{ url }}
 {% endblock text_body %}
 
 {% block html_body %}
@@ -33,7 +33,7 @@ Please activate your clearance node using the direct endpoint sequence below to 
         </p>
         
         <div style="text-align: center; margin: 32px 0;">
-            <a href="{{ frontend_activation_url }}" style="background-color: #faf5ff; color: #7e22ce; border: 1px solid #f3e8ff; padding: 12px 24px; text-decoration: none; border-radius: 12px; font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; display: inline-block; transition: all 150s ease;">
+            <a href="{{ url }}" style="background-color: #faf5ff; color: #7e22ce; border: 1px solid #f3e8ff; padding: 12px 24px; text-decoration: none; border-radius: 12px; font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; display: inline-block; transition: all 150s ease;">
                 Activate Clearance Node
             </a>
         </div>
@@ -41,9 +41,8 @@ Please activate your clearance node using the direct endpoint sequence below to 
         <p style="font-size: 12px; font-weight: 500; color: #64748b; line-height: 1.5; margin-bottom: 8px;">
             If the interactive router action fails, manually append this token endpoint string into your web browser bar:
         </p>
-        
         <p style="word-break: break-all; font-size: 11px; font-weight: 700; color: #7e22ce; background-color: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; margin: 0;">
-            {{ frontend_activation_url }}
+            {{ url }}
         </p>
         
         <hr style="border: 0; border-top: 1px solid #f1f5f9; margin: 24px 0;">

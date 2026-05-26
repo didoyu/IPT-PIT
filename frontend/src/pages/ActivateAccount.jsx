@@ -21,19 +21,18 @@ export default function ActivateAccount() {
       initialized.current = true;
 
       const activate = async () => {
-  try {
-    // 🌐 SWAP 127.0.0.1 FOR YOUR ACTUAL LOCAL NETWORK IP
-    await axios.post('http://192.168.18.38:8000/api/auth/users/activation/', {
-      uid,
-      token
-    });
-    setStatus('success');
-    setTimeout(() => navigate('/'), 3000);
-  } catch (err) {
-    setStatus('error');
-    console.error("Activation Handshake Error:", err.response?.data || err);
-  }
-};
+        try {
+          await axios.post('http://127.0.0.1:8000/api/auth/users/activation/', {
+            uid,
+            token
+          });
+          setStatus('success');
+          setTimeout(() => navigate('/'), 3000);
+        } catch (err) {
+          setStatus('error');
+          console.error("Activation Handshake Error:", err.response?.data || err);
+        }
+      };
       activate();
     }
   }, [uid, token, navigate]);

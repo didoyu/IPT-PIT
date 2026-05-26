@@ -6,13 +6,12 @@ class CustomActivationEmail(email.ActivationEmail):
 
     def get_context_data(self):
         context = super().get_context_data()
+        # Djoser provides 'uid' and 'token' in the context by default
         uid = context.get('uid')
         token = context.get('token')
         
-        # Pull dynamically from settings.py
-        frontend_url = getattr(settings, 'FRONTEND_URL', 'http://localhost:5173')
-        
-        # 🔑 FIX: Use a completely custom variable key name that Djoser can't overwrite
-        context['frontend_activation_url'] = f"{frontend_url}/activate/{uid}/{token}"
+        # We manually build the URL to point to your React Frontend
+        # We use http://localhost:3000/ because that's where your React app is
+        context['url'] = f"http://localhost:5173/activate/{uid}/{token}"
         
         return context
