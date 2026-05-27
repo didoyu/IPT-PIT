@@ -26,14 +26,14 @@ export default function TakeExam() {
     if (!token) return;
 
     // Load exam data
-    axios.get(`http://127.0.0.1:8000/api/exams/${id}/`, {
+    axios.get(`https://ipt-pitbackend.onrender.com/api/exams/${id}/`, {
       headers: { Authorization: `Token ${token}` }
     })
     .then(res => setExam(res.data))
     .catch(err => console.error("Could not load exam data:", err));
 
     // Check if already taken
-    axios.get(`http://127.0.0.1:8000/api/exams/${id}/taken/`, {
+    axios.get(`https://ipt-pitbackend.onrender.com/api/exams/${id}/taken/`, {
       headers: { Authorization: `Token ${token}` }
     })
     .then(res => {
@@ -87,7 +87,7 @@ export default function TakeExam() {
 
     try {
       const res = await axios.post(
-        'http://127.0.0.1:8000/api/submit-exam/',
+        'https://ipt-pitbackend.onrender.com/api/submit-exam/',
         { exam_id: id, answers: answers },
         { headers: { Authorization: `Token ${token}` } }
       );

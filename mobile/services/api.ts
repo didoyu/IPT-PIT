@@ -6,7 +6,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 const DEV_LOCAL_IP = "http://192.168.18.38:8000/api/"; 
 
 // Bypass Platform.select since real phones running Expo Go need the local network IP directly
-const baseURL = DEV_LOCAL_IP;
+const baseURL = "https://ipt-pitbackend.onrender.com/api/";
 
 const api = axios.create({
   baseURL: baseURL,
