@@ -27,6 +27,24 @@ function calculateAge(birthday) {
   return age;
 }
 
+function extractBackendErrorMessage(payload) {
+  if (!payload) return 'Registration failed.';
+  if (typeof payload.error === 'string' && payload.error.trim()) return payload.error;
+  if (typeof payload.detail === 'string' && payload.detail.trim()) return payload.detail;
+
+  // Handle serializer-like shapes: { field: ["message"] }
+  for (const value of Object.values(payload)) {
+    if (Array.isArray(value) && value.length > 0) {
+      return String(value[0]);
+    }
+    if (typeof value === 'string' && value.trim()) {
+      return value;
+    }
+  }
+
+  return 'Registration failed.';
+}
+
 export default function Register() {
   const [formData, setFormData] = useState({
     username: '',
@@ -45,6 +63,11 @@ export default function Register() {
 
   const [profilePicture, setProfilePicture] = useState(null);
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({
+    username: '',
+    email: ''
+  });
   const navigate = useNavigate();
 
   // Visibility States for Password Toggles
@@ -62,6 +85,8 @@ export default function Register() {
   const handleRegister = async (e) => {
     e.preventDefault();
     setError('');
+    setSuccessMessage('');
+    setFieldErrors({ username: '', email: '' });
 
     const data = new FormData();
     Object.keys(formData).forEach(key => data.append(key, formData[key]));
@@ -70,15 +95,32 @@ export default function Register() {
     }
 
     try {
-      await axios.post('https://ipt-pitbackend.onrender.com/api/register/', data, {
+      const response = await axios.post('https://ipt-pitbackend.onrender.com/api/register/', data, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
-      alert("Registration successful! Check your email to activate.");
+
+      const message = response.data?.message || 'Registration successful! Check your email to activate.';
+      const emailStatus = response.data?.email_status;
+
+      if (emailStatus === 'failed') {
+        setSuccessMessage(message);
+        alert(message);
+      } else {
+        alert(message);
+      }
+
       navigate('/');
     } catch (err) {
-      const errorMsg = err.response?.data?.error || "Registration failed.";
+      const backend = err.response?.data || {};
+      const errorMsg = extractBackendErrorMessage(backend);
+      const field = backend.field;
+
+      if (field === 'username' || field === 'email') {
+        setFieldErrors((prev) => ({ ...prev, [field]: errorMsg }));
+      }
+
       setError(errorMsg);
-      console.error(err.response?.data); 
+      console.error(backend);
     }
   };
 
@@ -114,6 +156,12 @@ export default function Register() {
         {error && (
           <div className="mb-4 p-3 text-sm bg-red-50 border border-red-200 text-red-700 rounded-xl text-center font-medium">
             {error}
+          </div>
+        )}
+
+        {successMessage && (
+          <div className="mb-4 p-3 text-sm bg-amber-50 border border-amber-200 text-amber-800 rounded-xl text-center font-medium">
+            {successMessage}
           </div>
         )}
 
@@ -220,12 +268,18 @@ export default function Register() {
                   <input type="text" required className={inputStyle} placeholder="Username" 
                     value={formData.username}
                     onChange={(e) => setFormData({ ...formData, username: e.target.value })} />
+                  {fieldErrors.username && (
+                    <p className="mt-1 text-xs text-red-600 font-semibold">{fieldErrors.username}</p>
+                  )}
                 </div>
                 <div>
                   <label className={labelStyle}>Email</label>
                   <input type="email" required className={inputStyle} placeholder="Email address" 
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })} />
+                  {fieldErrors.email && (
+                    <p className="mt-1 text-xs text-red-600 font-semibold">{fieldErrors.email}</p>
+                  )}
                 </div>
               </div>
 

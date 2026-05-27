@@ -194,19 +194,19 @@ DJOSER = {
 }
 
 # EMAIL SMTP
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.smtp.EmailBackend')
 
-EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
 
-EMAIL_PORT = 587
+EMAIL_PORT = int(os.getenv('EMAIL_PORT', '587'))
 
-EMAIL_HOST_USER = 'cailing.christiandave123@gmail.com'
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', 'cailing.christiandave123@gmail.com')
 
-EMAIL_HOST_PASSWORD = 'eznkpdisrfmlwfjy'
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', 'eznkpdisrfmlwfjy')
 
-EMAIL_USE_TLS = True
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True').lower() == 'true'
 
-DEFAULT_FROM_EMAIL = 'cailing.christiandave123@gmail.com'
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', EMAIL_HOST_USER)
 
 # SITE SETTINGS
 SITE_NAME = 'Student Exam Portal'
@@ -215,4 +215,4 @@ DOMAIN = 'ipt-pitfrontend.onrender.com'
 
 PROTOCOL = 'https'
 
-FRONTEND_URL = "https://ipt-pitfrontend.onrender.com"
+FRONTEND_URL = os.getenv('FRONTEND_URL', 'https://ipt-pitfrontend.onrender.com')
