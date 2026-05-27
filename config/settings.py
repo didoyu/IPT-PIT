@@ -23,6 +23,7 @@ ALLOWED_HOSTS = [
 
 # APPLICATIONS
 INSTALLED_APPS = [
+
     # Django built-ins
     'django.contrib.admin',
     'django.contrib.auth',
@@ -47,8 +48,9 @@ INSTALLED_APPS = [
 # MIDDLEWARE
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
+
     'django.middleware.security.SecurityMiddleware',
-    
+
     # WhiteNoise
     'whitenoise.middleware.WhiteNoiseMiddleware',
 
@@ -81,35 +83,55 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 # DATABASE
-# Automatically pulls live config on Render, uses string fallback locally
+# FIXED: Swapped Supabase out for Render PostgreSQL using built-in Python parsing
+from urllib.parse import urlparse
+
+db_url = os.environ.get('DATABASE_URL', 'postgresql://didoy:Cppos6m8WVObPqMgNI92yLY3mdJv4dDh@dpg-d8beg3b7uimc73aslctg-a.oregon-postgres.render.com/ipt_pit_qjrr')
+parsed_url = urlparse(db_url)
+
 DATABASES = {
-    'default': dj_database_url.config(
-        default="postgresql://didoy:Cppos6m8WVObPqMgNI92yLY3mdJv4dDh@dpg-d8beg3b7uimc73aslctg-a.oregon-postgres.render.com/ipt_pit_qjrr",
-        conn_max_age=600
+    'default': dj_database_url.parse(
+        "postgresql://didoy:Cppos6m8WVObPqMgNI92yLY3mdJv4dDh@dpg-d8beg3b7uimc73aslctg-a.oregon-postgres.render.com/ipt_pit_qjrr"
     )
 }
 
 # PASSWORD VALIDATION
 AUTH_PASSWORD_VALIDATORS = [
-    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
+    {
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'
+    },
 ]
 
 # INTERNATIONALIZATION
 LANGUAGE_CODE = 'en-us'
+
 TIME_ZONE = 'UTC'
+
 USE_I18N = True
+
 USE_TZ = True
 
 # STATIC FILES
 STATIC_URL = 'static/'
+
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+STATICFILES_STORAGE = (
+    'whitenoise.storage.CompressedManifestStaticFilesStorage'
+)
 
 # MEDIA FILES
 MEDIA_URL = '/media/'
+
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # CLOUDINARY
@@ -118,7 +140,10 @@ CLOUDINARY_STORAGE = {
     'API_KEY': '135765745472285',
     'API_SECRET': '0O9abkisaKCTJyNknPnaPxzyljU',
 }
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
+DEFAULT_FILE_STORAGE = (
+    'cloudinary_storage.storage.MediaCloudinaryStorage'
+)
 
 # DEFAULT PRIMARY KEY
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
@@ -126,6 +151,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # CORS
 CORS_ALLOWED_ORIGINS = [
     "https://ipt-pitfrontend.onrender.com",
+    "https://ipt-pit.vercel.app",
 ]
 
 # REST FRAMEWORK
@@ -133,6 +159,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticatedOrReadOnly',
     ],
+
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
         'rest_framework.authentication.TokenAuthentication',
@@ -143,14 +170,19 @@ REST_FRAMEWORK = {
 # DJOSER
 DJOSER = {
     'LOGIN_FIELD': 'username',
+
     'USER_CREATE_PASSWORD_RETYPE': True,
+
     'SEND_ACTIVATION_EMAIL': True,
+
     'ACTIVATION_URL': 'activate/{uid}/{token}',
+
     'SERIALIZERS': {
         'user_create': 'core.serializers.UserCreateSerializer',
         'user': 'core.serializers.UserSerializer',
         'current_user': 'core.serializers.UserSerializer',
     },
+
     'EMAIL': {
         'activation': 'core.emails.CustomActivationEmail',
     },
@@ -158,15 +190,24 @@ DJOSER = {
 
 # EMAIL SMTP
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
 EMAIL_HOST = 'smtp.gmail.com'
+
 EMAIL_PORT = 587
+
 EMAIL_HOST_USER = 'cailing.christiandave123@gmail.com'
+
 EMAIL_HOST_PASSWORD = 'eznkpdisrfmlwfjy'
+
 EMAIL_USE_TLS = True
+
 DEFAULT_FROM_EMAIL = 'cailing.christiandave123@gmail.com'
 
 # SITE SETTINGS
 SITE_NAME = 'Student Exam Portal'
+
 DOMAIN = 'ipt-pitfrontend.onrender.com'
+
 PROTOCOL = 'https'
+
 FRONTEND_URL = "https://ipt-pitfrontend.onrender.com"
