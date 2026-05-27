@@ -18,7 +18,7 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
     '192.168.18.38',
     '0.0.0.0',
-    'ipt-pitfrontend.onrender.com',
+    'ipt-pit.vercel.app',
 ]
 
 # APPLICATIONS
@@ -150,7 +150,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # CORS
 CORS_ALLOWED_ORIGINS = [
-    "https://ipt-pitfrontend.onrender.com",
     "https://ipt-pit.vercel.app",
     "https://ipt-pitbackend.onrender.com",
     "http://localhost:5173",
@@ -195,25 +194,27 @@ DJOSER = {
 }
 
 # EMAIL SMTP
-EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.smtp.EmailBackend')
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
-EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_HOST = 'smtp.gmail.com'
 
-EMAIL_PORT = int(os.getenv('EMAIL_PORT', '587'))
+EMAIL_PORT = 587
 
-EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', 'cailing.christiandave123@gmail.com')
+EMAIL_HOST_USER = 'cailing.christiandave123@gmail.com'
 
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', 'eznkpdisrfmlwfjy')
+EMAIL_HOST_PASSWORD = 'eznkpdisrfmlwfjy'
 
-EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True').lower() == 'true'
+EMAIL_USE_TLS = True
 
-DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', EMAIL_HOST_USER)
+EMAIL_TIMEOUT = 15
+
+DEFAULT_FROM_EMAIL = 'cailing.christiandave123@gmail.com'
 
 # SITE SETTINGS
 SITE_NAME = 'Student Exam Portal'
 
-DOMAIN = 'ipt-pitfrontend.onrender.com'
+DOMAIN = 'ipt-pit.vercel.app'
 
 PROTOCOL = 'https'
 
-FRONTEND_URL = os.getenv('FRONTEND_URL', 'https://ipt-pitfrontend.onrender.com')
+FRONTEND_URL = os.getenv('FRONTEND_URL', 'https://ipt-pit.vercel.app')

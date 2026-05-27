@@ -68,6 +68,7 @@ export default function Register() {
     username: '',
     email: ''
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
   // Visibility States for Password Toggles
@@ -84,6 +85,9 @@ export default function Register() {
 
   const handleRegister = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return;
+
+    setIsSubmitting(true);
     setError('');
     setSuccessMessage('');
     setFieldErrors({ username: '', email: '' });
@@ -96,7 +100,7 @@ export default function Register() {
 
     try {
       const response = await axios.post('https://ipt-pitbackend.onrender.com/api/register/', data, {
-        headers: { 'Content-Type': 'multipart/form-data' }
+        timeout: 20000,
       });
 
       const message = response.data?.message || 'Registration successful! Check your email to activate.';
@@ -111,6 +115,11 @@ export default function Register() {
 
       navigate('/');
     } catch (err) {
+      if (err.code === 'ECONNABORTED') {
+        setError('Request timed out. Please try again in a moment.');
+        return;
+      }
+
       const backend = err.response?.data || {};
       const errorMsg = extractBackendErrorMessage(backend);
       const field = backend.field;
@@ -121,6 +130,8 @@ export default function Register() {
 
       setError(errorMsg);
       console.error(backend);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -349,8 +360,12 @@ export default function Register() {
 
           {/* Action Button Controls */}
           <div className="pt-2">
-            <button type="submit" className="w-full bg-purple-700 hover:bg-purple-600 text-white py-3 rounded-2xl font-bold shadow-lg shadow-purple-900/10 active:scale-[0.99] transition text-sm tracking-wide">
-              Register Account
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full bg-purple-700 hover:bg-purple-600 disabled:bg-purple-400 disabled:cursor-not-allowed text-white py-3 rounded-2xl font-bold shadow-lg shadow-purple-900/10 active:scale-[0.99] transition text-sm tracking-wide"
+            >
+              {isSubmitting ? 'Registering...' : 'Register Account'}
             </button>
           </div>
         </form>
