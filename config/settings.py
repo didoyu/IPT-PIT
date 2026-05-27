@@ -50,14 +50,12 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
 
     'django.middleware.security.SecurityMiddleware',
-<<<<<<< HEAD
+
 
     # WhiteNoise
     'whitenoise.middleware.WhiteNoiseMiddleware',
 
-=======
-    'whitenoise.middleware.WhiteNoiseMiddleware',
->>>>>>> 6872ce760f9ca27610a7bb9c81d4bd7d0f2803b7
+
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
