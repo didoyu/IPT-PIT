@@ -14,7 +14,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     const fetchExams = async () => {
       try {
-        const res = await axios.get('http://127.0.0.1:8000/api/exams/', {
+        const res = await axios.get('https://ipt-pitbackend.onrender.com/api/exams/', {
           headers: { Authorization: `Token ${token}` }
         });
         setExams(res.data);
@@ -34,7 +34,7 @@ export default function AdminDashboard() {
   // Confirm deletion
   const confirmDelete = async () => {
     try {
-      await axios.delete(`http://127.0.0.1:8000/api/exams/${examToDelete.id}/`, {
+      await axios.delete(`https://ipt-pitbackend.onrender.com/api/exams/${examToDelete.id}/`, {
         headers: { Authorization: `Token ${token}` }
       });
       setExams(exams.filter(e => e.id !== examToDelete.id));

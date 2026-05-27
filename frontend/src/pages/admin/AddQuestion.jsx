@@ -26,7 +26,7 @@ export default function AddQuestion() {
 
   const fetchExamData = async () => {
     try {
-      const res = await axios.get(`http://127.0.0.1:8000/api/exams/${examId}/`, { headers });
+      const res = await axios.get(`https://ipt-pitbackend.onrender.com/api/exams/${examId}/`, { headers });
       setQuestions(res.data.questions);
       setExamTitle(res.data.title);
     } catch (err) { console.error(err); }
@@ -42,9 +42,9 @@ export default function AddQuestion() {
 
     try {
       if (editingId) {
-        await axios.put(`http://127.0.0.1:8000/api/questions/${editingId}/`, { ...newQuestion, exam: examId }, { headers });
+        await axios.put(`https://ipt-pitbackend.onrender.com/api/questions/${editingId}/`, { ...newQuestion, exam: examId }, { headers });
       } else {
-        await axios.post(`http://127.0.0.1:8000/api/questions/`, { ...newQuestion, exam: examId }, { headers });
+        await axios.post(`https://ipt-pitbackend.onrender.com/api/questions/`, { ...newQuestion, exam: examId }, { headers });
       }
       handleCancelEdit();
       fetchExamData();
@@ -80,7 +80,7 @@ export default function AddQuestion() {
 
   const handleDelete = async () => {
     try {
-      await axios.delete(`http://127.0.0.1:8000/api/questions/${deleteQuestionId}/`, { headers });
+      await axios.delete(`https://ipt-pitbackend.onrender.com/api/questions/${deleteQuestionId}/`, { headers });
       setShowDeleteModal(false);
       setDeleteQuestionId(null);
       fetchExamData();

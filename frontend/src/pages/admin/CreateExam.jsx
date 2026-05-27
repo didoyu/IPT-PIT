@@ -13,7 +13,7 @@ export default function CreateExam() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post('http://127.0.0.1:8000/api/exams/', {
+      const res = await axios.post('https://ipt-pitbackend.onrender.com/api/exams/', {
         title,
         description,
         pass_mark: passMark

@@ -12,6 +12,6 @@ class CustomActivationEmail(email.ActivationEmail):
         
         # We manually build the URL to point to your React Frontend
         # We use http://localhost:3000/ because that's where your React app is
-        context['url'] = f"http://localhost:5173/activate/{uid}/{token}"
+        context['url'] = f"{settings.FRONTEND_URL}/activate/{uid}/{token}"
         
         return context

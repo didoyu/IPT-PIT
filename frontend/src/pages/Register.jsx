@@ -70,7 +70,7 @@ export default function Register() {
     }
 
     try {
-      await axios.post('http://127.0.0.1:8000/api/register/', data, {
+      await axios.post('https://ipt-pitbackend.onrender.com/api/register/', data, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       alert("Registration successful! Check your email to activate.");
