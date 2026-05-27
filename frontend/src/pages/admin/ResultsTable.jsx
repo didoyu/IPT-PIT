@@ -15,7 +15,7 @@ export default function ResultsTable() {
   useEffect(() => {
     const fetchResults = async () => {
       try {
-        const res = await axios.get('https://ipt-pit-lgr4.onrender.com/api/admin-results/', {
+        const res = await axios.get('https://ipt-pitbackend.onrender.com/api/admin-results/', {
           headers: { Authorization: `Token ${token}` }
         });
         setResults(res.data);

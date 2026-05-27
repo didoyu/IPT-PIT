@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { User, Shield, Calendar, MapPin, Mail, Layers } from "lucide-react";
 
-const API_BASE_URL = "https://ipt-pit-lgr4.onrender.com";
+const API_BASE_URL = "https://ipt-pitbackend.onrender.com";
 
 export default function Profile() {
   const [profile, setProfile] = useState(null);

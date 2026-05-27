@@ -22,7 +22,7 @@ export default function ActivateAccount() {
 
       const activate = async () => {
         try {
-          await axios.post('https://ipt-pit-lgr4.onrender.com/api/auth/users/activation/', {
+          await axios.post('https://ipt-pitbackend.onrender.com/api/auth/users/activation/', {
             uid,
             token
           });

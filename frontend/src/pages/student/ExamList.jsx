@@ -22,7 +22,7 @@ export default function ExamList() {
   useEffect(() => {
     const fetchExams = async () => {
       try {
-        const res = await axios.get('https://ipt-pit-lgr4.onrender.com/api/exams/', {
+        const res = await axios.get('https://ipt-pitbackend.onrender.com/api/exams/', {
           headers: { Authorization: `Token ${token}` }
         });
         setExams(res.data);

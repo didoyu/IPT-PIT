@@ -10,7 +10,7 @@ export default function StudentDashboard() {
   useEffect(() => {
     const fetchResults = async () => {
       try {
-        const res = await axios.get('https://ipt-pit-lgr4.onrender.com/api/student-results/', {
+        const res = await axios.get('https://ipt-pitbackend.onrender.com/api/student-results/', {
           headers: { Authorization: `Token ${token}` }
         });
         setResults(res.data);
