@@ -1,5 +1,7 @@
 import logging
 import requests
+from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
 from django.db import IntegrityError, transaction
 from rest_framework import viewsets, status
 from rest_framework.decorators import api_view, permission_classes
@@ -22,12 +24,28 @@ logger = logging.getLogger(__name__)
 
 
 def _send_activation_email(request, user):
+    required_email_settings = {
+        'EMAIL_HOST_USER': settings.EMAIL_HOST_USER,
+        'EMAIL_HOST_PASSWORD': settings.EMAIL_HOST_PASSWORD,
+        'DEFAULT_FROM_EMAIL': settings.DEFAULT_FROM_EMAIL,
+    }
+    missing_settings = [
+        name for name, value in required_email_settings.items() if not value
+    ]
+    if missing_settings:
+        raise ImproperlyConfigured(
+            f"Missing email settings: {', '.join(missing_settings)}"
+        )
+
     context = {
         'user': user,
         'uid': encode_uid(user.pk),
         'token': default_token_generator.make_token(user),
     }
-    CustomActivationEmail(request, context).send([user.email])
+    CustomActivationEmail(request, context).send(
+        [user.email],
+        from_email=settings.DEFAULT_FROM_EMAIL,
+    )
 
 # --- AUTHENTICATION ---
 

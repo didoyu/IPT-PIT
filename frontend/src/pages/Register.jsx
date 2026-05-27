@@ -107,8 +107,8 @@ export default function Register() {
       const emailStatus = response.data?.email_status;
 
       if (emailStatus === 'failed') {
-        setSuccessMessage(message);
-        alert(message);
+        setError(message);
+        return;
       } else {
         alert(message);
       }

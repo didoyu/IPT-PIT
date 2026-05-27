@@ -1,17 +1,15 @@
-from djoser import email
 from django.conf import settings
+from djoser import email
+
 
 class CustomActivationEmail(email.ActivationEmail):
     template_name = "emails/activation.html"
 
     def get_context_data(self):
         context = super().get_context_data()
-        # Djoser provides 'uid' and 'token' in the context by default
-        uid = context.get('uid')
-        token = context.get('token')
-        
-        # We manually build the URL to point to your React Frontend
-        # We use http://localhost:3000/ because that's where your React app is
-        context['url'] = f"{settings.FRONTEND_URL}/activate/{uid}/{token}"
-        
+
+        frontend_url = (settings.FRONTEND_URL or '').rstrip('/')
+        if frontend_url:
+            context['url'] = f"{frontend_url}/activate/{context['uid']}/{context['token']}"
+
         return context
