@@ -67,12 +67,12 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'EXAMONLINEPIT',
+        'NAME': 'postgres',
         'USER': 'postgres',
-        'PASSWORD': 'admin123',
-        'HOST': 'localhost',
+        'PASSWORD': 'oXtIzyhldojjEa0v',
+        'HOST': 'db.xavmptiucisythoiojav.supabase.co',
         'PORT': '5432',
-    },
+    }
 }
 
 # PASSWORD VALIDATION

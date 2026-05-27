@@ -55,6 +55,7 @@ export default function Login() {
         username,
         password,
       });
+      console.log('BACKEND RESPONSE:', JSON.stringify(response.data));
 
       const { token, is_staff, username: dbUsername } = response.data;
 
