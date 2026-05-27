@@ -65,17 +65,20 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 # DATABASE
+# FIXED: Swapped Supabase out for Render PostgreSQL using built-in Python parsing
+from urllib.parse import urlparse
+
+db_url = os.environ.get('DATABASE_URL', 'postgresql://didoy:Cppos6m8WVObPqMgNI92yLY3mdJv4dDh@dpg-d8beg3b7uimc73aslctg-a.oregon-postgres.render.com/ipt_pit_qjrr')
+parsed_url = urlparse(db_url)
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
-        'USER': 'postgres.xavmptiucisythoiojav',
-        'PASSWORD': 'oXtIzyhldojjEa0v',
-        'HOST': 'aws-1-ap-northeast-2.pooler.supabase.com',
-        'PORT': '6543',
-        'OPTIONS': {
-            'sslmode': 'require',
-        },
+        'NAME': parsed_url.path[1:],
+        'USER': parsed_url.username,
+        'PASSWORD': parsed_url.password,
+        'HOST': parsed_url.hostname,
+        'PORT': parsed_url.port or '5432',
     }
 }
 
