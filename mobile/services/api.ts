@@ -3,7 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // 🌐 EXPO GO Wi-Fi ROUTER IP
 // Your phone and laptop must be on the exact same Wi-Fi network.
-const DEV_LOCAL_IP = "http://192.168.18.38:8000/api/"; 
+const DEV_LOCAL_IP = "http://192.168.1.173:8000/api/"; //swapped to my local ip so swap it to yours if you wanna use it
 
 // Bypass Platform.select since real phones running Expo Go need the local network IP directly
 const baseURL = "https://ipt-pitbackend.onrender.com/api/";
