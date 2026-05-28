@@ -1,8 +1,10 @@
 # Python bytecode / cache
-**/__pycache__/
-*.py[cod]
-*$py.class
-
-# Django local environment files (just in case)
+# .gitignore
 .env
+__pycache__/
+*.pyc
+*.pyo
 db.sqlite3
+/staticfiles
+/media
+.env.local
