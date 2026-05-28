@@ -74,11 +74,14 @@ parsed_url = urlparse(db_url)
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': parsed_url.path[1:],
-        'USER': parsed_url.username,
-        'PASSWORD': parsed_url.password,
-        'HOST': parsed_url.hostname,
-        'PORT': parsed_url.port or '5432',
+        'NAME': 'ipt_pit_qjrr',
+        'USER': 'didoy',
+        'PASSWORD': 'Cppos6m8WVObPqMgNI92yLY3mdJv4dDh',
+        'HOST': 'dpg-d8beg3b7uimc73aslctg-a.oregon-postgres.render.com',
+        'PORT': '5432',
+        'OPTIONS': {
+            'sslmode': 'require',
+        }       
     }
 }
 
@@ -132,7 +135,7 @@ REST_FRAMEWORK = {
 DJOSER = {
     'LOGIN_FIELD': 'username',
     'USER_CREATE_PASSWORD_RETYPE': True,
-    'SEND_ACTIVATION_EMAIL': True,
+    'SEND_ACTIVATION_EMAIL': False,
     'ACTIVATION_URL': 'activate/{uid}/{token}',
     'SERIALIZERS': {
         # Use lowercase 'user_create' for the registration logic
