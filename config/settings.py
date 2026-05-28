@@ -1,6 +1,5 @@
 import os
 from pathlib import Path
-import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -48,16 +47,8 @@ INSTALLED_APPS = [
 # MIDDLEWARE
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
-
     'django.middleware.security.SecurityMiddleware',
-<<<<<<< HEAD
-
-    # WhiteNoise
     'whitenoise.middleware.WhiteNoiseMiddleware',
-
-=======
-    'whitenoise.middleware.WhiteNoiseMiddleware',
->>>>>>> 6872ce760f9ca27610a7bb9c81d4bd7d0f2803b7
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -87,29 +78,19 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 # DATABASE
-# FIXED: Swapped Supabase out for Render PostgreSQL using built-in Python parsing
-from urllib.parse import urlparse
-
-db_url = os.environ.get('DATABASE_URL', 'postgresql://didoy:Cppos6m8WVObPqMgNI92yLY3mdJv4dDh@dpg-d8beg3b7uimc73aslctg-a.oregon-postgres.render.com/ipt_pit_qjrr')
-parsed_url = urlparse(db_url)
-
 DATABASES = {
-<<<<<<< HEAD
-    'default': dj_database_url.parse(
-        "postgresql://didoy:Cppos6m8WVObPqMgNI92yLY3mdJv4dDh@dpg-d8beg3b7uimc73aslctg-a.oregon-postgres.render.com/ipt_pit_qjrr"
-    )
-=======
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': parsed_url.path[1:],
-        'USER': parsed_url.username,
-        'PASSWORD': parsed_url.password,
-        'HOST': parsed_url.hostname,
-        'PORT': parsed_url.port or '5432',
+        'NAME': 'ipt_pit_qjrr',
+        'USER': 'didoy',
+        'PASSWORD': 'Cppos6m8WVObPqMgNI92yLY3mdJv4dDh',
+        'HOST': 'dpg-d8beg3b7uimc73aslctg-a.oregon-postgres.render.com',
+        'PORT': '5432',
+        'OPTIONS': {
+            'sslmode': 'require',
+        }
     }
->>>>>>> 6872ce760f9ca27610a7bb9c81d4bd7d0f2803b7
 }
-
 # PASSWORD VALIDATION
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -167,6 +148,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CORS_ALLOWED_ORIGINS = [
     "https://ipt-pitfrontend.onrender.com",
 ]
+CORS_ALLOW_ALL_ORIGINS = True
 
 # REST FRAMEWORK
 REST_FRAMEWORK = {
