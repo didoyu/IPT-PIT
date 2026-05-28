@@ -27,24 +27,6 @@ function calculateAge(birthday) {
   return age;
 }
 
-function extractBackendErrorMessage(payload) {
-  if (!payload) return 'Registration failed.';
-  if (typeof payload.error === 'string' && payload.error.trim()) return payload.error;
-  if (typeof payload.detail === 'string' && payload.detail.trim()) return payload.detail;
-
-  // Handle serializer-like shapes: { field: ["message"] }
-  for (const value of Object.values(payload)) {
-    if (Array.isArray(value) && value.length > 0) {
-      return String(value[0]);
-    }
-    if (typeof value === 'string' && value.trim()) {
-      return value;
-    }
-  }
-
-  return 'Registration failed.';
-}
-
 export default function Register() {
   const [formData, setFormData] = useState({
     username: '',
@@ -63,12 +45,6 @@ export default function Register() {
 
   const [profilePicture, setProfilePicture] = useState(null);
   const [error, setError] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
-  const [fieldErrors, setFieldErrors] = useState({
-    username: '',
-    email: ''
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
   // Visibility States for Password Toggles
@@ -85,56 +61,36 @@ export default function Register() {
 
   const handleRegister = async (e) => {
     e.preventDefault();
-    if (isSubmitting) return;
-
-    setIsSubmitting(true);
     setError('');
-    setSuccessMessage('');
-    setFieldErrors({ username: '', email: '' });
 
     const data = new FormData();
     Object.keys(formData).forEach(key => data.append(key, formData[key]));
     if (profilePicture) {
-      data.append('profile_picture', profilePicture);
+        data.append('profile_picture', profilePicture);
     }
 
     try {
-      const response = await axios.post('https://ipt-pitbackend.onrender.com/api/register/', data, {
-        timeout: 20000,
-      });
+        const response = await axios.post(
+            'https://ipt-pitbackend.onrender.com/api/register/', 
+            data,
+            { headers: { 'Content-Type': 'multipart/form-data' } }
+        );
 
-      const message = response.data?.message || 'Registration successful! Check your email to activate.';
-      const emailStatus = response.data?.email_status;
+        // ✅ Check if email failed even on 201
+        if (response.data?.error) {
+            setError(`Account created but activation email failed: ${response.data.error}`);
+            return;
+        }
 
-      if (emailStatus === 'failed') {
-        setError(message);
-        return;
-      } else {
-        alert(message);
-      }
+        alert("Registration successful! Check your email to activate.");
+        navigate('/');
 
-      navigate('/');
     } catch (err) {
-      if (err.code === 'ECONNABORTED') {
-        setError('Request timed out. Please try again in a moment.');
-        return;
-      }
-
-      const backend = err.response?.data || {};
-      const errorMsg = extractBackendErrorMessage(backend);
-      const field = backend.field;
-
-      if (field === 'username' || field === 'email') {
-        setFieldErrors((prev) => ({ ...prev, [field]: errorMsg }));
-      }
-
-      setError(errorMsg);
-      console.error(backend);
-    } finally {
-      setIsSubmitting(false);
+        const errorMsg = err.response?.data?.error || "Registration failed.";
+        setError(errorMsg);
+        console.error(err.response?.data);
     }
-  };
-
+};
   const inputStyle = "w-full px-3 py-2 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-purple-600 focus:border-purple-600 outline-none transition bg-white/80 text-slate-900";
   const selectStyle = "w-full px-3 py-2 text-sm rounded-xl border border-slate-300 bg-white/80 focus:ring-2 focus:ring-purple-600 focus:border-purple-600 outline-none transition text-slate-900";
   const labelStyle = "block text-xs font-semibold text-slate-700 mb-1";
@@ -146,7 +102,7 @@ export default function Register() {
       <div 
         className="absolute inset-0 bg-cover bg-center opacity-25 mix-blend-overlay pointer-events-none fixed"
         style={{ 
-          backgroundImage: "url('/images/gwapo.jpg')" 
+          backgroundImage: "url('/public/images/gwapo.jpg')" 
         }}
       />
 
@@ -167,12 +123,6 @@ export default function Register() {
         {error && (
           <div className="mb-4 p-3 text-sm bg-red-50 border border-red-200 text-red-700 rounded-xl text-center font-medium">
             {error}
-          </div>
-        )}
-
-        {successMessage && (
-          <div className="mb-4 p-3 text-sm bg-amber-50 border border-amber-200 text-amber-800 rounded-xl text-center font-medium">
-            {successMessage}
           </div>
         )}
 
@@ -279,18 +229,12 @@ export default function Register() {
                   <input type="text" required className={inputStyle} placeholder="Username" 
                     value={formData.username}
                     onChange={(e) => setFormData({ ...formData, username: e.target.value })} />
-                  {fieldErrors.username && (
-                    <p className="mt-1 text-xs text-red-600 font-semibold">{fieldErrors.username}</p>
-                  )}
                 </div>
                 <div>
                   <label className={labelStyle}>Email</label>
                   <input type="email" required className={inputStyle} placeholder="Email address" 
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })} />
-                  {fieldErrors.email && (
-                    <p className="mt-1 text-xs text-red-600 font-semibold">{fieldErrors.email}</p>
-                  )}
                 </div>
               </div>
 
@@ -360,12 +304,8 @@ export default function Register() {
 
           {/* Action Button Controls */}
           <div className="pt-2">
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full bg-purple-700 hover:bg-purple-600 disabled:bg-purple-400 disabled:cursor-not-allowed text-white py-3 rounded-2xl font-bold shadow-lg shadow-purple-900/10 active:scale-[0.99] transition text-sm tracking-wide"
-            >
-              {isSubmitting ? 'Registering...' : 'Register Account'}
+            <button type="submit" className="w-full bg-purple-700 hover:bg-purple-600 text-white py-3 rounded-2xl font-bold shadow-lg shadow-purple-900/10 active:scale-[0.99] transition text-sm tracking-wide">
+              Register Account
             </button>
           </div>
         </form>

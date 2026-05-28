@@ -167,16 +167,17 @@ LOGGING = {
 }
 
 # EMAIL — Gmail with SSL on port 465
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 465
-EMAIL_USE_SSL = True
-EMAIL_USE_TLS = False                                         # Must be False when using SSL
-EMAIL_HOST_USER = 'cailing.christiandave123@gmail.com'
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')        # Put app password in Render env vars
-EMAIL_TIMEOUT = 30
-DEFAULT_FROM_EMAIL = 'cailing.christiandave123@gmail.com'               # ← Free test address, no domain needed
-
+#EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+#EMAIL_HOST = 'smtp.gmail.com'
+#EMAIL_PORT = 465
+#EMAIL_USE_SSL = True
+#EMAIL_USE_TLS = False                                         # Must be False when using SSL
+#EMAIL_HOST_USER = 'cailing.christiandave123@gmail.com'
+#EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')        # Put app password in Render env vars
+#EMAIL_TIMEOUT = 30
+#DEFAULT_FROM_EMAIL = 'cailing.christiandave123@gmail.com'               # ← Free test address, no domain needed
+RESEND_API_KEY = os.getenv('RESEND_API_KEY')
+DEFAULT_FROM_EMAIL = 'onboarding@resend.dev'
 # SITE SETTINGS
 SITE_NAME = 'Student Exam Portal'
 DOMAIN = 'ipt-pit.vercel.app'
