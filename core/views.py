@@ -342,3 +342,26 @@ def chat_with_ollama(request):
             
     except requests.exceptions.ConnectionError:
         return Response({'reply': 'Could not communicate with background Ollama service engine.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def resend_activation_email(request):
+    email_address = request.data.get('email')
+    if not email_address:
+        return Response({'error': 'Email is required'}, status=400)
+
+    try:
+        user = User.objects.get(email=email_address, is_active=False)
+    except User.DoesNotExist:
+        return Response({'error': 'No inactive account found with that email'}, status=404)
+
+    try:
+        context = {
+            "user": user,
+            "uid": encode_uid(user.pk),
+            "token": default_token_generator.make_token(user),
+        }
+        CustomActivationEmail(request, context).send([user.email])
+        return Response({'message': 'Activation email resent successfully'}, status=200)
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)
